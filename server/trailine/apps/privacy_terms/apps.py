@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class UsersConfig(AppConfig):
+class PrivacyTermConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'trailine.apps.users'
+    name = "trailine.apps.privacy_terms"
