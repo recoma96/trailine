@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_yasg",
 
     "trailine.apps.users",
     "trailine.apps.privacy_terms",
@@ -53,7 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
+    # "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -135,3 +136,23 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "users.User"
+
+
+APPEND_SLASH = False
+
+SWAGGER_SETTINGS = {
+    "DEFAULT_API_URL": "",  # 이거 없으면 기본 url에 / 붙임
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "trailine.apps.common.pagination.CustomPagination",
+    "PAGE_SIZE": 20,  # 기본 페이지 크기
+
+    # 입출력 CamelCase 변환
+    "DEFAULT_RENDERER_CLASSES": (
+        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "djangorestframework_camel_case.parser.CamelCaseJSONParser",
+    ),
+}
