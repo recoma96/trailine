@@ -27,7 +27,7 @@ class PrivacyTermVersion(TimeStampModel):
 
     id = models.AutoField(primary_key=True, verbose_name="고유아이디", help_text="고유아이디")
     privacy_term = models.ForeignKey(PrivacyTerm, db_column="privacy_term_id", on_delete=models.PROTECT,
-                                     null=False, blank=False,
+                                     null=False, blank=False, related_name="versions",
                                      verbose_name="약관항목", help_text="약관 항목")
     version = models.PositiveSmallIntegerField(null=False, blank=False, default=1,
                                                verbose_name="약관버전", help_text="약관 버전")
