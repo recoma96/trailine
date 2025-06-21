@@ -16,7 +16,7 @@ if settings.DEBUG:
     schema_view = get_schema_view(
         openapi.Info(
             title="Trailine API Document",
-            default_version='v1',
+            default_version="v1",
             description="Trailine 서버 API 문서야",
             contact=openapi.Contact(email="seokbong60@gmail.com"),
         ),
@@ -25,9 +25,9 @@ if settings.DEBUG:
     )
 
     urlpatterns += [
-        re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-        path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        re_path(r"^swagger(?P<format>\.json|\.yaml)$", schema_view.without_ui(cache_timeout=0), name="schema-json"),
+        path("swagger", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
 
         # ReDoc
-        path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+        path("redoc", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     ]
