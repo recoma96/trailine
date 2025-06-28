@@ -1,26 +1,52 @@
 from rest_framework.exceptions import APIException
-from typing import Any, Optional
+from rest_framework import status
+
+from typing import Any, Dict, List
 
 
-class TrailineAPiException(APIException):
+class TrailineAPIException(APIException):
+    """Trailine API의 기본 예외 클래스"""
+
+    # 기본값 설정
+    status_code: int
+    error_code: str
+    message: str
+    extra_data: List | Dict[str, Any] | str | None
+
     def __init__(
-        self,
-        http_status: int,
-        error_code: str,
-        message: str,
-        extra_data: Optional[Any] = None
+            self,
+            http_status: int | None = None,
+            error_code: str | None = None,
+            message: str | None = None,
+            extra_data: List | Dict[str, Any] | str | None = None
     ):
-        self.http_status = http_status
-        self.error_code = error_code
-        self.message = message
-        self.extra_data = extra_data
-        self.status_code = http_status
+        self.extra_data = None
+
+        self.status_code = http_status or self.status_code
+        self.error_code = error_code or self.error_code
+        self.message = message or self.message
+        self.extra_data = extra_data or self.extra_data
+
         super().__init__(detail=self.get_response_data())
 
-    def get_response_data(self) -> dict:
-        response_data = {
+    def get_response_data(self) -> dict[str, Any]:
+        response = {
             "errorCode": self.error_code,
-            "errorMessage": self.message,
-            "extraData": self.extra_data
+            "errorMessage": self.message
         }
-        return response_data
+        if self.extra_data:
+            response["extraData"] = self.extra_data
+
+        return response
+
+
+class EmailSendFailed(TrailineAPIException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    error_code = "EMAIL-SEND-FAILED"
+    message = "이메일 전송에 실패했어요."
+
+
+class EmailSendNotAccepted(TrailineAPIException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    error_code = "EMAIL-SEND-NOT-ACCEPTED"
+    message = "이메일 송신이 거부되었어요."

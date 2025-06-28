@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from trailine.apps.api.v1.auth.types import AuthRequestPurpose
-from trailine.apps.common.enums import AuthRequestPurposeEnum
 
 
 class AuthEmailRequestSerializer(serializers.Serializer):
@@ -9,6 +8,6 @@ class AuthEmailRequestSerializer(serializers.Serializer):
     purpose = serializers.ChoiceField(choices=AuthRequestPurpose.choices(), required=True, help_text="인증목적")
 
     def validate_purpose(self, value):
-        if value not in [purpose.value for purpose in AuthRequestPurposeEnum]:
+        if value not in [purpose.value for purpose in AuthRequestPurpose]:
             raise serializers.ValidationError("해당 목적으로 요청을 할 수가 없어요")
         return value
