@@ -155,4 +155,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": (
         "djangorestframework_camel_case.parser.CamelCaseJSONParser",
     ),
+
+    # 요청 횟수 제한
+    "DEFAULT_THROTTLE_CLASSES": [
+        "trailine.apps.common.throttles.AuthRequestRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_request": "10/minute"
+    },
+
+    # 예외에 따른 응답 핸들러
+    "EXCEPTION_HANDLER": "trailine.apps.common.exc_handler.exception_handler",
 }
