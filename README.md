@@ -2,6 +2,9 @@
 
 등산 및 트레킹 코스에 대한 가이드를 알려주는 서비스
 
+[프로젝트 진행 현황](https://github.com/orgs/sweetcase-production/projects/8)
+* [회원가입 관련 API 구현](https://github.com/sweetcase-production/trailine/pull/13)
+
 
 ## 개발 목표
 
