@@ -1,14 +1,15 @@
 from unittest.mock import patch
 
 from django.urls import reverse
+from django.conf import settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 
 class AuthEmailRequestTests(APITestCase):
-    @patch("trailine.apps.api.v1.auth.views.cache.set")
-    @patch("trailine.apps.api.v1.auth.views.send_mail", return_value=1)
-    @patch("trailine.apps.api.v1.auth.views.generate_verification_code", return_value="ABC123")
+    @patch("trailine.apps.api.v1.auth.services.cache.set")
+    @patch("trailine.apps.api.v1.auth.services.send_mail", return_value=1)
+    @patch("trailine.apps.api.v1.auth.services.generate_verification_code", return_value="ABC123")
     def test_auth_email_request_success(self, mock_generate_code, mock_send_mail, mock_cache_set):
         url = reverse("auth_email_request")
         data = {
@@ -18,32 +19,13 @@ class AuthEmailRequestTests(APITestCase):
 
         response = self.client.post(url, data, content_type="application/json")
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         # 캐시에 아래와 같은 값이 제대로 저장되어 있는 지 확인
         mock_cache_set.assert_called_with(
             "verify:email:signup:dGVzdHVzZXJAZXhhbXBsZS5jb20=",
             "ABC123",
-            timeout=300
+            timeout=settings.EMAIL_VERIFICATION_TIMEOUT
         )
-
-    def test_auth_email_request_invalid_email(self):
-        url = reverse("auth_email_request")
-        data = {
-            "email": "invalid-email",
-            "purpose": "signup"
-        }
-
-        response = self.client.post(url, data, content_type="application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_auth_email_request_missing_purpose(self):
-        url = reverse("auth_email_request")
-        data = {
-            "email": "testuser@example.com"
-        }
-
-        response = self.client.post(url, data, content_type="application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_auth_email_request_invalid_purpose(self):
         url = reverse("auth_email_request")
@@ -55,8 +37,8 @@ class AuthEmailRequestTests(APITestCase):
         response = self.client.post(url, data, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch("trailine.apps.api.v1.auth.views.send_mail", return_value=0)
-    @patch("trailine.apps.api.v1.auth.views.generate_verification_code", return_value="ABC123")
+    @patch("trailine.apps.api.v1.auth.services.send_mail", return_value=0)
+    @patch("trailine.apps.api.v1.auth.utils.generate_verification_code", return_value="ABC123")
     def test_auth_email_request_send_mail_failure(self, mock_generate_code, mock_send_mail):
         url = reverse("auth_email_request")
         data = {

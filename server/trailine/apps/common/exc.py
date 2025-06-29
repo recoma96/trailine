@@ -50,3 +50,15 @@ class EmailSendNotAccepted(TrailineAPIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     error_code = "EMAIL-SEND-NOT-ACCEPTED"
     message = "이메일 송신이 거부되었어요."
+
+
+class AuthCodeNotExist(TrailineAPIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    error_code = "AUTH-CODE-NOT-EXIST"
+    message = "이메일 인증을 요청하지 않았거나. 인증 시간이 만료가 되었어요. 다시 시도해 주세요."
+
+
+class AuthCodeNotMatched(TrailineAPIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    error_code = "AUTH-CODE-NOT-MATCHED"
+    message = "인증번호가 틀렸어요. 다시 입력해 주세요."

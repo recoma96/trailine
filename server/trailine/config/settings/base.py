@@ -192,4 +192,4 @@ EMAIL_SUBJECT_PREFIX = "[Trailine] "
 
 
 EMAIL_VERIFICATION_TIMEOUT = 300    # 이메일 인증 제한시간
-SIGNUP_TIMEOUT = 1200               # 이메일 인증 후 회원가입 제한시간
+EMAIL_VERIFICATION_SUCCESS_TIMEOUT = 1200               # 이메일 인증 후 다음 작업 까지의 제한시간

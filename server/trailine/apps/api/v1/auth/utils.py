@@ -8,6 +8,6 @@ def generate_verification_code() -> str:
     return "".join(random.choices(characters, k=6))
 
 
-def get_verify_cache_key(purpose: str, email: str) -> str:
+def get_verify_email_cache_key(purpose: str, email: str) -> str:
     encoded_email = base64.b64encode(email.encode()).decode()
     return f"verify:email:{purpose}:{encoded_email}"
