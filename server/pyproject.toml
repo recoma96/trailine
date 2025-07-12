@@ -10,6 +10,7 @@ dependencies = [
     "django-redis>=6.0.0",
     "djangorestframework>=3.16.0",
     "djangorestframework-camel-case>=1.4.2",
+    "djangorestframework-simplejwt>=5.5.0",
     "drf-yasg>=1.21.10",
     "markdown>=3.8",
     "psycopg2-binary>=2.9.10",

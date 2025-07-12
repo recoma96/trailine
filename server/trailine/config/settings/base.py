@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -44,9 +45,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "rest_framework",
     "drf_yasg",
     "django_redis",
+    "rest_framework_simplejwt",
 
     "trailine.apps.users",
     "trailine.apps.privacy_terms",
@@ -178,6 +181,10 @@ REST_FRAMEWORK = {
 
     # 예외에 따른 응답 핸들러
     "EXCEPTION_HANDLER": "trailine.apps.common.exc_handler.exception_handler",
+
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
 }
 
 # 이메일 관련 설정
@@ -191,5 +198,11 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@trailine.com")
 EMAIL_SUBJECT_PREFIX = "[Trailine] "
 
 
-EMAIL_VERIFICATION_TIMEOUT = 300    # 이메일 인증 제한시간
-EMAIL_VERIFICATION_SUCCESS_TIMEOUT = 1200               # 이메일 인증 후 다음 작업 까지의 제한시간
+EMAIL_VERIFICATION_TIMEOUT = 300            # 이메일 인증 제한시간
+EMAIL_VERIFICATION_SUCCESS_TIMEOUT = 1200   # 이메일 인증 후 다음 작업 까지의 제한시간
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    'SIGNING_KEY': SECRET_KEY,
+}

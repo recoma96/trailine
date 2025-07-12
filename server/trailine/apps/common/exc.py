@@ -62,3 +62,9 @@ class AuthCodeNotMatched(TrailineAPIException):
     status_code = status.HTTP_400_BAD_REQUEST
     error_code = "AUTH-CODE-NOT-MATCHED"
     message = "인증번호가 틀렸어요. 다시 입력해 주세요."
+
+
+class NeedEmailAuth(TrailineAPIException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    error_code = "EMAIL-AUTH-REQUIRED"
+    message = "이메일 인증이 필요해요."

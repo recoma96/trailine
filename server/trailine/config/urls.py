@@ -7,7 +7,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin", admin.site.urls),
     path("api/v1/", include("trailine.apps.api.v1.urls")),
     path("api/v2/", include("trailine.apps.api.v2.urls")),
 ]
