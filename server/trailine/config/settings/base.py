@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -44,8 +45,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "rest_framework",
     "drf_yasg",
+    "django_redis",
+    "rest_framework_simplejwt",
 
     "trailine.apps.users",
     "trailine.apps.privacy_terms",
@@ -95,6 +99,18 @@ DATABASES = {
     }
 }
 
+# Redis cache settings
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{env("REDIS_HOST", default="127.0.0.1")}:{env("REDIS_PORT", default=6379)}/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": env("REDIS_PASSWORD", default=None),
+        }
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -137,7 +153,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "users.User"
 
-
 APPEND_SLASH = False
 
 SWAGGER_SETTINGS = {
@@ -155,4 +170,39 @@ REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": (
         "djangorestframework_camel_case.parser.CamelCaseJSONParser",
     ),
+
+    # 요청 횟수 제한
+    "DEFAULT_THROTTLE_CLASSES": [
+        "trailine.apps.common.throttles.AuthRequestRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_request": "10/minute"
+    },
+
+    # 예외에 따른 응답 핸들러
+    "EXCEPTION_HANDLER": "trailine.apps.common.exc_handler.exception_handler",
+
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+# 이메일 관련 설정
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = env("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@trailine.com")
+EMAIL_SUBJECT_PREFIX = "[Trailine] "
+
+
+EMAIL_VERIFICATION_TIMEOUT = 300            # 이메일 인증 제한시간
+EMAIL_VERIFICATION_SUCCESS_TIMEOUT = 1200   # 이메일 인증 후 다음 작업 까지의 제한시간
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    'SIGNING_KEY': SECRET_KEY,
 }
