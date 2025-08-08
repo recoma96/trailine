@@ -1,8 +1,11 @@
-from rest_framework.decorators import api_view
+from drf_yasg import openapi
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from trailine.apps.api.v1.auth.serializers import AuthEmailRequestSerializer, AuthEmailVerifySerializer
 from trailine.apps.api.v1.auth.services import send_verify_email, verify_email_code
@@ -49,3 +52,31 @@ def verify_email(request: Request) -> Response:
 
     verify_email_code(purpose, email, code)
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@swagger_auto_schema(
+    method='post',
+    operation_description="Refresh 토큰을 블랙리스트 처리하여 JWT 로그아웃을 수행",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=["refresh"],
+        properties={
+            "refresh": openapi.Schema(type=openapi.TYPE_STRING, description="Refresh 토큰"),
+        },
+    ),
+    responses={
+        205: openapi.Response(description="로그아웃 성공"),
+        400: openapi.Response(description="요청 오류 또는 유효하지 않은 토큰"),
+    }
+)
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def logout(request: Request):
+    refresh = request.data.get("refresh", "")
+    if not refresh:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    try:
+        RefreshToken(refresh).blacklist()
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    return Response(status=status.HTTP_205_RESET_CONTENT)

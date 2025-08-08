@@ -1,12 +1,8 @@
 from typing import Dict, Any
 
 from django.core.cache import cache
-from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, mixins, status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -75,30 +71,3 @@ class UserViewSet(
         verify_success_email_key = get_verify_success_email_cache_key(new_user.email, AuthRequestPurpose.SIGNUP.value)
         cache.delete(verify_success_email_key)
 
-
-@swagger_auto_schema(
-    method='post',
-    operation_description="Refresh 토큰을 블랙리스트 처리하여 JWT 로그아웃을 수행",
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        required=["refresh"],
-        properties={
-            "refresh": openapi.Schema(type=openapi.TYPE_STRING, description="Refresh 토큰"),
-        },
-    ),
-    responses={
-        205: openapi.Response(description="로그아웃 성공"),
-        400: openapi.Response(description="요청 오류 또는 유효하지 않은 토큰"),
-    }
-)
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def logout_view(request: Request):
-    refresh = request.data.get("refresh", "")
-    if not refresh:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    try:
-        RefreshToken(refresh).blacklist()
-    except Exception:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    return Response(status=status.HTTP_205_RESET_CONTENT)
