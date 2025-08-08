@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "django_redis",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
 
     "trailine.apps.users",
     "trailine.apps.privacy_terms",
@@ -204,5 +205,10 @@ EMAIL_VERIFICATION_SUCCESS_TIMEOUT = 1200   # 이메일 인증 후 다음 작업
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    'SIGNING_KEY': SECRET_KEY,
+    "SIGNING_KEY": SECRET_KEY,
+
+    # Refresh Token Blacklist Setting
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ROTATE_REFRESH_TOKENS": True,
 }
+

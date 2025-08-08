@@ -70,3 +70,4 @@ class UserViewSet(
         # 이메일 인증 캐싱 데이터 소멸
         verify_success_email_key = get_verify_success_email_cache_key(new_user.email, AuthRequestPurpose.SIGNUP.value)
         cache.delete(verify_success_email_key)
+
