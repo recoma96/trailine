@@ -1,0 +1,57 @@
+name: "🐞 버그 리포트 (Bug Report)"
+description: 버그를 신고하여 프로젝트 개선에 기여해주세요.
+title: "[BUG] "
+labels: ["fix"]
+assignees:
+  - recoma96
+body:
+  - type: markdown
+    attributes:
+      value: |
+        버그를 발견하고 신고해주셔서 감사합니다! 아래 양식에 맞춰 최대한 상세하게 작성해주시면 문제 해결에 큰 도움이 됩니다.
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: "🐛 어떤 버그인가요? (Describe the bug)"
+      description: "버그에 대해 명확하고 간결하게 설명해주세요."
+      placeholder: "예: 로그인 버튼을 클릭해도 반응이 없습니다."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: "🔁 재현 방법 (To Reproduce)"
+      description: "버그를 재현하기 위한 정확한 단계를 알려주세요."
+      placeholder: |
+        1. '...' 페이지로 이동합니다.
+        2. '....' 버튼을 클릭합니다.
+        3. 에러를 확인합니다.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "🤔 예상 결과 (Expected behavior)"
+      description: "원래 어떤 동작을 예상하셨는지 명확하고 간결하게 설명해주세요."
+      placeholder: "예: 로그인 버튼을 클릭하면 메인 페이지로 이동해야 합니다."
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📸 스크린샷 (Screenshots)"
+      description: "해당하는 경우, 문제 설명을 돕기 위해 스크린샷이나 GIF를 추가해주세요."
+  - type: textarea
+    id: environment
+    attributes:
+      label: "💻 사용 환경 (Environment)"
+      description: "버그가 발생한 환경을 알려주세요."
+      value: |
+        - OS:
+        - Browser:
+        - Device:
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "📝 추가 정보 (Additional context)"
+      description: "문제에 대한 다른 추가 정보가 있다면 여기에 작성해주세요. (로그, 관련 이슈 등)"
