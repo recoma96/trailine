@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
     "trailine.apps.users",
     "trailine.apps.privacy_terms",
+    "trailine.apps.course",
 ]
 
 MIDDLEWARE = [
