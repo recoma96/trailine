@@ -1,20 +1,16 @@
 import os
 import uuid
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.conf import settings
 
 from trailine.apps.common.models import TimeStampModel
 
 
 def image_upload_to(instance: "CourseSeriesImage", filename: str) -> str:
     base, ext = os.path.splitext(filename)
-    path = f"public/course-series/{instance.course_series.id}/{uuid.uuid4()}{ext}"
-    if settings.DEBUG:
-        # 개발단의 경우 앞에 dev를 붙인다.
-        return os.path.join("dev", path)
-    return path
+    return f"public/course-series/{instance.course_series.id}/{uuid.uuid4()}{ext}"
 
 
 class CourseSeries(TimeStampModel):

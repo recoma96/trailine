@@ -217,7 +217,7 @@ SIMPLE_JWT = {
 
 # AWS S3 관련
 STORAGES = {
-    "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+    "default": {"BACKEND": "trailine.config.storages.CustomS3Storage"},
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
