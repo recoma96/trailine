@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django_redis",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "storages",
 
     "trailine.apps.users",
     "trailine.apps.privacy_terms",
@@ -213,3 +214,25 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
 }
 
+
+# AWS S3 관련
+STORAGES = {
+    "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+AWS_STORAGE_BUCKET_NAME = "project-trailine"
+AWS_S3_REGION_NAME = "ap-northeast-2"  # 서울
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None  # ACL 비활성(권장)
+# CloudFront를 쓰면 여기에 도메인 설정
+# AWS_S3_CUSTOM_DOMAIN = "dxxxxx.cloudfront.net"
+# MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+# CloudFront를 안쓰면:
+MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/"
+
+MAXIMUM_IMAGE_SIZE = 5 * 1024 * 1024
+MAXIMUM_IMAGE_SIZE_TO_TEXT = "5GB"
+AVAILABLE_IMAGE_EXISTS = {".jpg", ".jpeg", ".png", ".webp"}

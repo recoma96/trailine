@@ -1,8 +1,7 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
-# Register your models here.
-from django.contrib import admin
-
+from .forms import AdminCourseSeriesImageForm
 from .models import CourseSeries, CourseSeriesImage
 
 
@@ -27,7 +26,12 @@ class CourseSeriesAdmin(admin.ModelAdmin):
 @admin.register(CourseSeriesImage)
 class CourseSeriesImageAdmin(admin.ModelAdmin):
     """CourseSeriesImage 모델을 위한 어드민 설정"""
-
-    list_display = ("id", "course_series", "url", "created_at")
+    form = AdminCourseSeriesImageForm
+    list_display = ("id", "course_series", "image", "created_at")
     list_select_related = ("course_series",)  # ForeignKey 필드 성능 최적화
     search_fields = ("course_series__title",)
+
+    def thumb(self, obj: CourseSeriesImage):
+        if obj.image:
+            return format_html('<img src="{}" style="max-height:80px" />', obj.image.url)
+        return "-"

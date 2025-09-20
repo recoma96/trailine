@@ -1,6 +1,20 @@
+import os
+import uuid
+
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from trailine.apps.common.models import TimeStampModel
+
+
+def image_upload_to(instance: "CourseSeriesImage", filename: str) -> str:
+    base, ext = os.path.splitext(filename)
+    path = f"public/course-series/{instance.course_series.id}/{uuid.uuid4()}{ext}"
+    if settings.DEBUG:
+        # 개발단의 경우 앞에 dev를 붙인다.
+        return os.path.join("dev", path)
+    return path
 
 
 class CourseSeries(TimeStampModel):
@@ -12,7 +26,6 @@ class CourseSeries(TimeStampModel):
     id = models.AutoField(primary_key=True, verbose_name="고유아이디", help_text="고유아이디")
     title = models.CharField(max_length=64, null=False, verbose_name="시리즈명", help_text="시리즈명")
     description = models.TextField(null=True, blank=True, verbose_name="시리즈설명", help_text="시리즈설명")
-
 
 
 class CourseSeriesImage(TimeStampModel):
@@ -29,4 +42,22 @@ class CourseSeriesImage(TimeStampModel):
         verbose_name="코스 시리즈",
         help_text="코스 시리즈",
     )
-    url = models.URLField(max_length=512, verbose_name="URL", help_text="URL")
+    image = models.ImageField(
+        upload_to=image_upload_to,
+        max_length=512,
+        null=False,
+        blank=False,
+        verbose_name="URL",
+        help_text="URL",
+        db_column="url",
+    )
+
+    def clean(self):
+        # 이미지 업로드 전의 유효성 검사
+        if self.image:
+            if self.image.size > settings.MAXIMUM_IMAGE_SIZE:
+                raise ValidationError(f"이미지 용량은 {settings.MAXIMUM_IMAGE_SIZE_TO_TEXT} 이하여야 합니다.")
+            valid_exts = settings.AVAILABLE_IMAGE_EXISTS
+            ext = os.path.splitext(self.image.name)[1].lower()
+            if ext not in valid_exts:
+                raise ValidationError(f"허용 확장자: {', '.join(sorted(valid_exts))}")
