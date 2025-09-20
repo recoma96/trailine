@@ -13,6 +13,7 @@ class CourseSeriesImageInline(admin.TabularInline):
     verbose_name = "코스 시리즈 이미지"
     verbose_name_plural = "코스 시리즈 이미지들"
     readonly_fields = ("thumb",)
+    ordering = ("priority",)
 
     @admin.display(description="이미지 미리보기", empty_value="이미지 없음")
     def thumb(self, obj: CourseSeriesImage):
@@ -25,7 +26,7 @@ class CourseSeriesImageInline(admin.TabularInline):
 class CourseSeriesAdmin(admin.ModelAdmin):
     """CourseSeries 모델을 위한 어드민 설정"""
 
-    list_display = ("id", "title", "description", "created_at", "updated_at")
+    list_display = ("id", "title", "created_at", "updated_at")
     search_fields = ("title",)
     inlines = [CourseSeriesImageInline]
     ordering = ("-id",)
@@ -38,6 +39,7 @@ class CourseSeriesImageAdmin(admin.ModelAdmin):
     list_display = ("id", "course_series", "thumb", "created_at")
     list_select_related = ("course_series",)  # ForeignKey 필드 성능 최적화
     search_fields = ("course_series__title",)
+    ordering = ("-created_at",)
 
     @admin.display(description="이미지 미리보기", empty_value="이미지 없음")
     def thumb(self, obj: CourseSeriesImage):

@@ -29,6 +29,12 @@ class CourseSeriesImage(TimeStampModel):
         db_table = "course_series_image"
         verbose_name = "코스 시리즈 이미지"
         verbose_name_plural = "코스 시리즈 이미지"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("course_series", "priority"),
+                name="uq_item_parent_priority",
+            )
+        ]
 
     id = models.AutoField(primary_key=True, verbose_name="고유아이디", help_text="고유아이디")
     course_series = models.ForeignKey(
@@ -46,6 +52,12 @@ class CourseSeriesImage(TimeStampModel):
         verbose_name="URL",
         help_text="URL",
         db_column="url",
+    )
+    priority = models.IntegerField(
+        null=False,
+        default=0,
+        verbose_name="우선순위",
+        help_text="우선순위 (값이 작을 수록 위로 올라간다)",
     )
 
     def clean(self):
