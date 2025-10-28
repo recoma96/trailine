@@ -25,12 +25,6 @@ class CreateUserTestCase(APITestCase):
             "email": "testuser@example.com",
             "nickname": "failed",
             "password": "TestPassword123",
-            "termAgreements": [
-                {
-                    "termId": self.required_privacy_term.privacy_term.id,
-                    "isAgree": True
-                }
-            ]
         }
         response = self.client.post(url, data, content_type="application/json")
 
@@ -46,53 +40,10 @@ class CreateUserTestCase(APITestCase):
             "email": "testuser@example.com",
             "nickname": "success",
             "password": "TestPassword123",
-            "termAgreements": [
-                {
-                    "termId": self.required_privacy_term.privacy_term.id,
-                    "isAgree": True
-                }
-            ]
         }
         response = self.client.post(url, data, content_type="application/json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        mock_cache_get.assert_called_once_with(
-            get_verify_success_email_cache_key("testuser@example.com", AuthRequestPurpose.SIGNUP.value)
-        )
-
-    @patch("trailine.apps.api.v1.users.views.cache.get", return_value=True)
-    def test_create_user_empty_term_agreements(self, mock_cache_get):
-        url = reverse("user-list")
-        data = {
-            "email": "testuser@example.com",
-            "nickname": "failed",
-            "password": "TestPassword123",
-            "termAgreements": []
-        }
-        response = self.client.post(url, data, content_type="application/json")
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        mock_cache_get.assert_called_once_with(
-            get_verify_success_email_cache_key("testuser@example.com", AuthRequestPurpose.SIGNUP.value)
-        )
-
-    @patch("trailine.apps.api.v1.users.views.cache.get", return_value=True)
-    def test_create_user_required_term_disagree(self, mock_cache_get):
-        url = reverse("user-list")
-        data = {
-            "email": "testuser@example.com",
-            "nickname": "failed",
-            "password": "TestPassword123",
-            "termAgreements": [
-                {
-                    "termId": self.required_privacy_term.privacy_term.id,
-                    "isAgree": False
-                }
-            ]
-        }
-        response = self.client.post(url, data, content_type="application/json")
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         mock_cache_get.assert_called_once_with(
             get_verify_success_email_cache_key("testuser@example.com", AuthRequestPurpose.SIGNUP.value)
         )
