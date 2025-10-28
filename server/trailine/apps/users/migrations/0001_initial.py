@@ -11,7 +11,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0012_alter_user_first_name_max_length'),
-        ('privacy_terms', '0001_initial'),
     ]
 
     operations = [
@@ -38,23 +37,6 @@ class Migration(migrations.Migration):
                 'verbose_name': '사용자',
                 'verbose_name_plural': '사용자',
                 'db_table': 'user',
-            },
-        ),
-        migrations.CreateModel(
-            name='UserPrivacyTerm',
-            fields=[
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.AutoField(help_text='고유 아이디', primary_key=True, serialize=False, verbose_name='고유아이디')),
-                ('is_agreed', models.BooleanField(help_text='약관 동의 여부', verbose_name='약관동의여부')),
-                ('agreed_at', models.DateTimeField(help_text='동의 날짜 (동의 거부시 null 처리)', null=True, verbose_name='동의날짜')),
-                ('privacy_term_version', models.ForeignKey(db_column='privacy_term_version_id', help_text='해당 유저와 관련된 약관 항목', on_delete=django.db.models.deletion.PROTECT, to='privacy_terms.privacytermversion', verbose_name='약관항목')),
-                ('user', models.ForeignKey(db_column='user_id', help_text='해당 약관과 관련된 사용자', on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL, verbose_name='사용자')),
-            ],
-            options={
-                'verbose_name': '사용자개인정보동의항목',
-                'verbose_name_plural': '사용자 개인정보 동의 항목',
-                'db_table': 'user_privacy_term',
             },
         ),
     ]

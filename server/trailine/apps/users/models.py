@@ -3,7 +3,6 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
 from trailine.apps.common.models import TimeStampModel
-from trailine.apps.privacy_terms.models import PrivacyTermVersion
 
 
 class UserManager(BaseUserManager):
@@ -56,20 +55,3 @@ class User(TimeStampModel, AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ["nickname"]
 
     objects = UserManager()
-
-
-class UserPrivacyTerm(TimeStampModel):
-    class Meta:
-        db_table = "user_privacy_term"
-        verbose_name = "사용자개인정보동의항목"
-        verbose_name_plural = "사용자 개인정보 동의 항목"
-        
-    id = models.AutoField(primary_key=True, verbose_name="고유아이디", help_text="고유 아이디")
-    user = models.ForeignKey(User, db_column="user_id", on_delete=models.PROTECT, null=False, blank=False,
-                             verbose_name="사용자", help_text="해당 약관과 관련된 사용자")
-    privacy_term_version = models.ForeignKey(PrivacyTermVersion, db_column="privacy_term_version_id",
-                                             on_delete=models.PROTECT, null=False, blank=False,
-                                             verbose_name="약관항목", help_text="해당 유저와 관련된 약관 항목")
-    is_agreed = models.BooleanField(null=False, blank=False, verbose_name="약관동의여부", help_text="약관 동의 여부")
-    agreed_at = models.DateTimeField(null=True, blank=False,
-                                     verbose_name="동의날짜", help_text="동의 날짜 (동의 거부시 null 처리)")
