@@ -5,18 +5,10 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from trailine.apps.api.v1.auth.types import AuthRequestPurpose
 from trailine.apps.common.utils import get_verify_success_email_cache_key
-from trailine.tests.conftest import PrivacyTermFactory, PrivacyTermVersionFactory
 
 
 class CreateUserTestCase(APITestCase):
     # url(user-list)를 사용하는 이유는 GET, POST가 viewset에 의해 user-list에 포함되기 때문이다.
-    required_privacy_term: PrivacyTermVersionFactory
-
-    @classmethod
-    def setUp(cls):
-        _required_privacy_term_base = PrivacyTermFactory.create()
-        cls.required_privacy_term = PrivacyTermVersionFactory.create(
-            privacy_term=_required_privacy_term_base, is_required=True)
 
     @patch("trailine.apps.api.v1.users.views.cache.get", return_value=None)
     def test_create_user_email_not_verified(self, mock_cache_get):

@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     "storages",
 
     "trailine.apps.users",
-    "trailine.apps.privacy_terms",
     "trailine.apps.course",
 ]
 
