@@ -85,6 +85,7 @@ jobs:
       run: |
         uv run coverage erase
         uv run coverage run manage.py test --settings=trailine.config.settings.testing
+        uv run coverage html
         uv run coverage report -m --fail-under=80
       env:
         DB_NAME: ${{ env.POSTGRES_DB }}
