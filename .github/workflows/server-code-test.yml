@@ -97,8 +97,8 @@ jobs:
         DEFAULT_FROM_EMAIL: ${{ env.DEFAULT_FROM_EMAIL }}
 
     - name: Upload HTML coverage report
-      if: always() # 실패 상관없이 보고서 출력
+      if: ${{ always() && !env.ACT }} # 실패 상관없이 보고서 출력
       uses: actions/upload-artifact@v4
       with:
         name: coverage-html
-        path: htmlcov
+        path: ./server/htmlcov
