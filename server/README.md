@@ -25,6 +25,21 @@ REDIS_PORT=
 ```
 
 5. 개발서버 실행
-```python
+```shell
 uv run manage.py runserver --settings=trailine.config.settings.development
+```
+
+* 테스트코드 실행 및 coverage 확인
+```shell
+# coverage 이전 내역 삭제
+uv run coverage erase
+
+# 테스트 코드 실행
+uv run coverage run manage.py test --settings=trailine.config.settings.testing
+
+# coverage 결과 터미널에서 보기
+uv run coverage report
+
+# coverage 결과 html 파일로 보기
+uv run coverage html # 해당 구문 실행 이후 htmlcov 디렉토리에서 index.html 열기
 ```

@@ -1,0 +1,105 @@
+name: Django Server Test
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+
+    env:
+      # 서비스 컨테이너 및 테스트에 사용할 환경 변수
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: testdb
+      # Django 설정
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY || 'a-dummy-secret-key-for-testing' }}
+      DB_HOST: localhost
+      REDIS_HOST: localhost
+      # 이메일 가상 설정
+      EMAIL_HOST_USER: "test@example.com"
+      EMAIL_HOST_PASSWORD: "password"
+      DEFAULT_FROM_EMAIL: "noreply@example.com"
+
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      working-directory: . # uv는 프로젝트 루트에 설치
+
+    - name: Set virtualenv
+      run: uv venv
+
+    - name: Install dependencies with uv
+      run: uv pip install .
+
+    - name: Run migrations
+      run: uv run python manage.py migrate --settings=trailine.config.settings.testing
+      env:
+        DB_NAME: ${{ env.POSTGRES_DB }}
+        DB_USER: ${{ env.POSTGRES_USER }}
+        DB_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        DB_PORT: 5432
+        EMAIL_HOST_USER: ${{ env.EMAIL_HOST_USER }}
+        EMAIL_HOST_PASSWORD: ${{ env.EMAIL_HOST_PASSWORD }}
+        DEFAULT_FROM_EMAIL: ${{ env.DEFAULT_FROM_EMAIL }}
+
+    - name: Run tests
+      run: |
+        uv run coverage erase
+        uv run coverage run manage.py test --settings=trailine.config.settings.testing
+        uv run coverage html
+        uv run coverage report -m --fail-under=80
+      env:
+        DB_NAME: ${{ env.POSTGRES_DB }}
+        DB_USER: ${{ env.POSTGRES_USER }}
+        DB_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        DB_PORT: 5432
+        EMAIL_HOST_USER: ${{ env.EMAIL_HOST_USER }}
+        EMAIL_HOST_PASSWORD: ${{ env.EMAIL_HOST_PASSWORD }}
+        DEFAULT_FROM_EMAIL: ${{ env.DEFAULT_FROM_EMAIL }}
+
+    - name: Upload HTML coverage report
+      if: ${{ always() && !env.ACT }} # 실패 상관없이 보고서 출력
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-html
+        path: ./server/htmlcov
+        retention-days: 7
