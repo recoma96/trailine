@@ -82,7 +82,10 @@ jobs:
         DEFAULT_FROM_EMAIL: ${{ env.DEFAULT_FROM_EMAIL }}
 
     - name: Run tests
-      run: uv run python manage.py test --settings=trailine.config.settings.testing
+      run: |
+        uv run coverage erase
+        uv run coverage run manage.py test --settings=trailine.config.settings.testing
+        uv run coverage report -m --fail-under=80
       env:
         DB_NAME: ${{ env.POSTGRES_DB }}
         DB_USER: ${{ env.POSTGRES_USER }}
@@ -91,3 +94,10 @@ jobs:
         EMAIL_HOST_USER: ${{ env.EMAIL_HOST_USER }}
         EMAIL_HOST_PASSWORD: ${{ env.EMAIL_HOST_PASSWORD }}
         DEFAULT_FROM_EMAIL: ${{ env.DEFAULT_FROM_EMAIL }}
+
+    - name: Upload HTML coverage report
+      if: always() # 실패 상관없이 보고서 출력
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-html
+        path: htmlcov
