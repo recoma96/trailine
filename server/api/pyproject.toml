@@ -1,0 +1,23 @@
+[project]
+name = "trailine-api"
+version = "0.1.0"
+description = "트레일라인 API 서버"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.121.0",
+    "pydantic>=2.12.4",
+    "uvicorn[standard]>=0.38.0",
+]
+
+[tool.hatch.build]
+packages = ["src/api"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+trailine_model = { workspace = true }
+
+[project.scripts]
+api-dev = "api:main"
