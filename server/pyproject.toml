@@ -1,26 +1,12 @@
 [project]
 name = "trailine-server"
-version = "0.0.1"
-description = "Hiking Guilde Service Server"
+version = "0.1.0"
+description = "트레일라인 서버 루트 프로젝트"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "boto3>=1.40.34",
-    "django-environ>=0.12.0",
-    "django-filter>=25.1",
-    "django-redis>=6.0.0",
-    "django-storages>=1.14.6",
-    "djangorestframework>=3.16.0",
-    "djangorestframework-camel-case>=1.4.2",
-    "djangorestframework-simplejwt>=5.5.0",
-    "drf-yasg>=1.21.10",
-    "markdown>=3.8",
-    "pillow>=11.3.0",
-    "psycopg2-binary>=2.9.10",
-]
+dependencies = []
 
-[dependency-groups]
-dev = [
-    "coverage>=7.11.0",
-    "factory-boy>=3.3.3",
+[tool.uv.workspace]
+members = [
+    "api", "admin", "model"
 ]

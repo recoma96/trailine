@@ -1,0 +1,4 @@
+[run]
+source = src/trailine_api
+omit =
+    */tests/*

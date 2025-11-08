@@ -1,0 +1,106 @@
+name: Trailine Server Test
+
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+
+    env:
+      # 서비스 컨테이너 및 테스트에 사용할 환경 변수
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: testdb
+      REDIS_HOST: localhost
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      working-directory: . # uv는 프로젝트 루트에 설치
+
+    - name: Set virtualenv
+      run: uv venv
+
+    - name: Install dependencies with uv
+      run: |
+        cd api
+        uv sync
+        cd ..
+        uv pip install -e model
+
+    - name: Run migrations
+      run: ./.venv/bin/alembic -c model/alembic.ini upgrade head # alembic.ini
+      env:
+        DB_SCHEMA: ${{ env.POSTGRES_DB }}
+        DB_USER: ${{ env.POSTGRES_USER }}
+        DB_PSWD: ${{ env.POSTGRES_PASSWORD }}
+        DB_PORT: 5432
+        DB_HOST: localhost
+
+    - name: Type Check
+      run: |
+        source .venv/bin/activate
+        cd api
+        mypy
+
+    - name: Run tests
+      run: |
+        source .venv/bin/activate
+        cd api
+        coverage erase
+        coverage run -m pytest
+        coverage report --fail-under=80
+        coverage html
+      env:
+        DB_SCHEMA: ${{ env.POSTGRES_DB }}
+        DB_USER: ${{ env.POSTGRES_USER }}
+        DB_PSWD: ${{ env.POSTGRES_PASSWORD }}
+        DB_PORT: 5432
+        DB_HOST: localhost
+
+    - name: Upload HTML coverage report
+      if: ${{ always() && !env.ACT }} # 실패 상관없이 보고서 출력
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-html
+        path: ./server/api/htmlcov
+        retention-days: 7

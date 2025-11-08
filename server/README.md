@@ -1,45 +1,39 @@
 # Trailine Server
 
+Trailine 서비스의 백엔드 서버입니다. 이 프로젝트는 모노레포로 구성되어 있으며, 관리자 페이지, API 서버, 공용 데이터 모델 라이브러리를 포함하고 있습니다.
 
-## Installation <작성중>
+## 🚀 프로젝트 구조
 
-1. Python 3.13, uv 패키지 설치 필요
-2. `uv` 를 이용해 패키지 설치
-3. AWS configure 설정
-4. 환경변수 세팅
-```dotenv
-DJANGO_SECRET_KEY=<장고 시크릿키 (암의문자열)>
+이 프로젝트는 `uv/pyproject`를 사용한 모노레포로 구성되어 있습니다. 각 패키지의 역할은 다음과 같습니다.
 
-DB_HOST=
-DB_NAME=
-DB_PASSWORD=
-DB_PORT=
-DB_USER=
-
-EMAIL_HOST_USER=<이메일 전송 호스트 이메일>
-EMAIL_HOST_PASSWORD=<이메일 전송을 하기 위한 호스트 비밀번호>
-DEFAULT_FROM_EMAIL=<송신 이메일 정보>
-
-REDIS_HOST=
-REDIS_PORT=
+```
+/
+│── admin/      # 관리자 페이지 (Admin Dashboard)
+│── api/        # 메인 API 서버
+│── model/      # 데이터베이스 ORM Model (공용 라이브ar리)
+└── pyproject.toml
 ```
 
-5. 개발서버 실행
-```shell
-uv run manage.py runserver --settings=trailine.config.settings.development
-```
+*   **`admin`**: 서비스 관리를 위한 SQLAdmin+Web 기반의 관리자 페이지입니다.
+*   **`api`**: 핵심 API 서버입니다.
+*   **`model`**: `api`와 `admin` 등 여러 패키지에서 공통으로 사용하는 데이터베이스 모델 및 관련 유틸리티를 포함하는 라이브러리입니다.
 
-* 테스트코드 실행 및 coverage 확인
-```shell
-# coverage 이전 내역 삭제
-uv run coverage erase
+## ✨ 기술 스택
 
-# 테스트 코드 실행
-uv run coverage run manage.py test --settings=trailine.config.settings.testing
+* **`api`**:
+  * FastAPI
+  * sqlalchemy
+  * pytest
+* **`admin`**:
+  * SQLAdmin
+  * sqlalchemy
+* **`model`**:
+  * SQLAdmin
 
-# coverage 결과 터미널에서 보기
-uv run coverage report
+## Docs
 
-# coverage 결과 html 파일로 보기
-uv run coverage html # 해당 구문 실행 이후 htmlcov 디렉토리에서 index.html 열기
-```
+각 레포 마다 README.md가 있으며, 여기서 직접 링크를 통해 문서를 확인하실 수 있습니다.
+
+* [api](./api/README.md)
+* [model](./model/README.md)
+* [admin](./admin/README.md)
