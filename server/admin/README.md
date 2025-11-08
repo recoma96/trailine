@@ -23,7 +23,9 @@ server $ uv pip install -e model # DB Model 모듈 설치
 
 server $ uv pip install -e admin # 관리자 페이지 시스템 설치
 
-server $ cd admin
+server $ source .venv/bin/activate
 
-server/admin $ run-admin
+(.venv)server $ cd admin
+
+(.venv)server/admin $ run-admin
 ```

@@ -38,3 +38,7 @@ runserver = "trailine_api:main"
 [tool.mypy]
 mypy_path = "src"
 packages = ["trailine_api"]
+
+[tool.coverage.run]
+source = ["trailine_api"]
+omit = ["*/tests/*"]

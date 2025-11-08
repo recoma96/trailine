@@ -84,10 +84,12 @@ jobs:
 
     - name: Run tests
       run: |
-        ./.venv/bin/coverage erase
-        ./.venv/bin/coverage run -m pytest
-        ./.venv/bin/coverage report --fail-under=80
-        ./.venv/bin/coverage html
+        source .venv/bin/activate
+        cd api
+        coverage erase
+        coverage run -m pytest
+        coverage report --fail-under=80
+        coverage html
       env:
         DB_SCHEMA: ${{ env.POSTGRES_DB }}
         DB_USER: ${{ env.POSTGRES_USER }}
