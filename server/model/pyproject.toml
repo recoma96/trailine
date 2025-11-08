@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "alembic>=1.17.1",
+    "psycopg[binary]>=3.2.12",
+    "sqlalchemy>=2.0.44",
+]
 
 [tool.setuptools]
 packages = ["trailine_model"]
