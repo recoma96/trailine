@@ -1,0 +1,19 @@
+[project]
+name = "trailine-model"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.17.1",
+    "bcrypt>=5.0.0",
+    "psycopg[binary]>=3.2.12",
+    "sqlalchemy>=2.0.44",
+]
+
+[tool.setuptools]
+packages = ["trailine_model"]
+package-dir = {"" = "src"}
+
+[tool.hatch.build]
+packages = ["src/trailine_model"]

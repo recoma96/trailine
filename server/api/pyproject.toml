@@ -1,0 +1,44 @@
+[project]
+name = "trailine-api"
+version = "0.1.0"
+description = "트레일라인 API 서버"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dependency-injector>=4.48.2",
+    "fastapi>=0.121.0",
+    "httpx>=0.28.1",
+    "pydantic>=2.12.4",
+    "python-dotenv>=1.2.1",
+    "sqlalchemy>=2.0.44",
+    "uvicorn[standard]>=0.38.0",
+]
+
+[tool.setuptools]
+packages = ["trailine_api"]
+package-dir = {"" = "src"}
+
+[tool.hatch.build]
+packages = ["src/trailine_api"]
+
+[tool.uv.sources]
+trailine_model = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "coverage>=7.11.1",
+    "factory-boy>=3.3.3",
+    "mypy>=1.18.2",
+    "pytest>=8.4.2",
+]
+
+[project.scripts]
+runserver = "trailine_api:main"
+
+[tool.mypy]
+mypy_path = "src"
+packages = ["trailine_api"]
+
+[tool.coverage.run]
+source = ["trailine_api"]
+omit = ["*/tests/*"]
