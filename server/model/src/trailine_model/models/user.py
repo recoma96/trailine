@@ -1,7 +1,8 @@
+import bcrypt
 from datetime import datetime
 
 from sqlalchemy import Integer, String, Boolean, text, DateTime
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from trailine_model.base import Base, TIME_ZONE_QUERY
 
@@ -25,3 +26,19 @@ class User(Base):
                                                  server_default=text(f"({TIME_ZONE_QUERY})"),
                                                  onupdate=text(f"({TIME_ZONE_QUERY})"))
     last_login_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True, comment="최근 로그인 날짜")
+
+    @validates("password")
+    def validate_password(self, key, password: str) -> str:
+        """
+        비밀번호를 bcrypt로 해싱한다.
+        """
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        return hashed_password.decode('utf-8')
+
+    def check_password(self, password: str) -> bool:
+        """
+        입력된 비밀번호와 저장된 해시 비밀번호를 비교한다.
+        :param password: 사용자가 입력한 비밀번호 (일반 텍스트)
+        :return: 비밀번호 일치 여부 (True/False)
+        """
+        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
