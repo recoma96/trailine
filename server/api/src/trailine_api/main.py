@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from trailine_api.routers import router as api_router
 
+
 app = FastAPI(title=__name__)
 
 
