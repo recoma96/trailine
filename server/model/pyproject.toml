@@ -16,4 +16,4 @@ packages = ["trailine_model"]
 package-dir = {"" = "src"}
 
 [tool.hatch.build]
-packages = ["src/model"]
+packages = ["src/trailine_model"]

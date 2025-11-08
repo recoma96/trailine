@@ -5,20 +5,23 @@ description = "트레일라인 API 서버"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "dependency-injector>=4.48.2",
     "fastapi>=0.121.0",
     "pydantic>=2.12.4",
     "python-dotenv>=1.2.1",
+    "sqlalchemy>=2.0.44",
     "uvicorn[standard]>=0.38.0",
 ]
 
-[tool.hatch.build]
-packages = ["src/api"]
+[tool.setuptools]
+packages = ["trailine_api"]
+package-dir = {"" = "src"}
 
-[tool.uv]
-package = false
+[tool.hatch.build]
+packages = ["src/trailine_api"]
 
 [tool.uv.sources]
 trailine_model = { workspace = true }
 
 [project.scripts]
-api-dev = "api:main"
+api-dev = "trailine_api:main"
