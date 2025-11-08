@@ -76,6 +76,12 @@ jobs:
         DB_PORT: 5432
         DB_HOST: localhost
 
+    - name: Type Check
+      run: |
+        source .venv/bin/activate
+        cd api
+        mypy
+
     - name: Run tests
       run: |
         ./.venv/bin/coverage erase

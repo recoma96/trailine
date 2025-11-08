@@ -28,8 +28,13 @@ trailine_model = { workspace = true }
 dev = [
     "coverage>=7.11.1",
     "factory-boy>=3.3.3",
+    "mypy>=1.18.2",
     "pytest>=8.4.2",
 ]
 
 [project.scripts]
 runserver = "trailine_api:main"
+
+[tool.mypy]
+mypy_path = "src"
+packages = ["trailine_api"]
