@@ -16,8 +16,6 @@ DB_SCHEMA = os.getenv("DB_SCHEMA")
 
 DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PSWD}@{DB_HOST}:{DB_PORT}/{DB_SCHEMA}"
 
-print(DATABASE_URL)
-
 engine = create_engine(
     DATABASE_URL,
     pool_size=int(os.getenv("DB_POOL_SIZE", "10")),

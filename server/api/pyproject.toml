@@ -31,4 +31,4 @@ dev = [
 ]
 
 [project.scripts]
-api-dev = "trailine_api:main"
+runserver = "trailine_api:main"
