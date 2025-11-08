@@ -14,5 +14,5 @@
 
 |포지션|사용기술|
 |---|---|
-|Backend|Python3.13, Django/DRF, Redis, PostgreSQL|
+|Backend|Python3.13, FastAPI, PostgreSQL, SQLAlchemy, SQLAdmin|
 |Frontend(WEB)|Typescript, React|
