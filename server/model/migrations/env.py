@@ -1,6 +1,7 @@
 from logging.config import fileConfig
 from trailine_model.base import DATABASE_URL, Base
 from trailine_model.models.user import *
+from trailine_model.models.course import *
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
