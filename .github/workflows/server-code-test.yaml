@@ -1,9 +1,9 @@
-name: Django Server Test
+name: Trailine Server Test
 
 
-# on:
-#   pull_request:
-#     branches: [ "main", "develop" ]
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
 
 jobs:
   test:
@@ -17,15 +17,7 @@ jobs:
       POSTGRES_USER: testuser
       POSTGRES_PASSWORD: testpassword
       POSTGRES_DB: testdb
-      # Django 설정
-      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY || 'a-dummy-secret-key-for-testing' }}
-      DB_HOST: localhost
       REDIS_HOST: localhost
-      # 이메일 가상 설정
-      EMAIL_HOST_USER: "test@example.com"
-      EMAIL_HOST_PASSWORD: "password"
-      DEFAULT_FROM_EMAIL: "noreply@example.com"
-
 
     services:
       postgres:
@@ -69,38 +61,38 @@ jobs:
       run: uv venv
 
     - name: Install dependencies with uv
-      run: uv pip install .
+      run: |
+        cd api
+        uv sync
+        cd ..
+        uv pip install -e model
 
     - name: Run migrations
-      run: uv run python manage.py migrate --settings=trailine.config.settings.testing
+      run: ./.venv/bin/alembic -c model/alembic.ini upgrade head # alembic.ini
       env:
-        DB_NAME: ${{ env.POSTGRES_DB }}
+        DB_SCHEMA: ${{ env.POSTGRES_DB }}
         DB_USER: ${{ env.POSTGRES_USER }}
-        DB_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        DB_PSWD: ${{ env.POSTGRES_PASSWORD }}
         DB_PORT: 5432
-        EMAIL_HOST_USER: ${{ env.EMAIL_HOST_USER }}
-        EMAIL_HOST_PASSWORD: ${{ env.EMAIL_HOST_PASSWORD }}
-        DEFAULT_FROM_EMAIL: ${{ env.DEFAULT_FROM_EMAIL }}
+        DB_HOST: localhost
 
     - name: Run tests
       run: |
-        uv run coverage erase
-        uv run coverage run manage.py test --settings=trailine.config.settings.testing
-        uv run coverage html
-        uv run coverage report -m --fail-under=80
+        ./.venv/bin/coverage erase
+        ./.venv/bin/coverage run -m pytest
+        ./.venv/bin/coverage report --fail-under=80
+        ./.venv/bin/coverage html
       env:
-        DB_NAME: ${{ env.POSTGRES_DB }}
+        DB_SCHEMA: ${{ env.POSTGRES_DB }}
         DB_USER: ${{ env.POSTGRES_USER }}
-        DB_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        DB_PSWD: ${{ env.POSTGRES_PASSWORD }}
         DB_PORT: 5432
-        EMAIL_HOST_USER: ${{ env.EMAIL_HOST_USER }}
-        EMAIL_HOST_PASSWORD: ${{ env.EMAIL_HOST_PASSWORD }}
-        DEFAULT_FROM_EMAIL: ${{ env.DEFAULT_FROM_EMAIL }}
+        DB_HOST: localhost
 
     - name: Upload HTML coverage report
       if: ${{ always() && !env.ACT }} # 실패 상관없이 보고서 출력
       uses: actions/upload-artifact@v4
       with:
         name: coverage-html
-        path: ./server/htmlcov
+        path: ./server/api/htmlcov
         retention-days: 7
