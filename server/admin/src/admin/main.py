@@ -55,6 +55,7 @@ class PlaceAdmin(ModelView, model=Place):
         Place.road_address,
         Place.land_address,
         Place.geog,
+        Place.is_searchable,
         Place.created_at,
         Place.updated_at,
     ]

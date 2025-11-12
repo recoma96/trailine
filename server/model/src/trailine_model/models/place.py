@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import Integer, String, Text
+from sqlalchemy import text, Integer, String, Text, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from geoalchemy2 import Geometry, Geography
 
@@ -23,3 +23,4 @@ class Place(Base, TimeStampModel):
     land_address: Mapped[str] = mapped_column(String(128), nullable=True, comment="지번 주소")
     road_address: Mapped[str] = mapped_column(String(128), nullable=True, comment="도로명 주소")
     description: Mapped[str] = mapped_column(Text, nullable=True, comment="설명")
+    is_searchable: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"), comment="검색 가능 여부")
