@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import text, Integer, String, Text, Boolean, ForeignKey
+from sqlalchemy import text, Integer, String, Text, Boolean, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from geoalchemy2 import Geometry, Geography
 
@@ -27,12 +27,16 @@ class Place(Base, TimeStampModel):
 
     images: Mapped[list["PlaceImage"]] = relationship("PlaceImage", back_populates="place")
 
+    def __str__(self) -> str:
+        return f"{self.id} - {self.name}"
+
 
 class PlaceImage(Base, TimeStampModel):
     __tablename__ = "place_image"
-    __table_args__ = {
-        "comment": "장소 이미지 리스트",
-    }
+    __table_args__ = (
+        UniqueConstraint("place_id", "sort_order", name="uq_place_image_place_id_sort_order"),
+        {"comment": "장소 이미지 리스트"},
+    )
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, comment="정렬 순서 (값이 작을수록 앞에 온다)")
     place_id: Mapped[int | None] = mapped_column(ForeignKey("place.id", onupdate="CASCADE", ondelete="SET NULL"),
