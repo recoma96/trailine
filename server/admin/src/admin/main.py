@@ -3,12 +3,13 @@ import re
 import uuid
 from typing import Any, List, Type
 from markupsafe import Markup
+import json
 
 import boto3
 from botocore.exceptions import NoCredentialsError
 from fastapi import FastAPI, HTTPException
 from geoalchemy2 import WKTElement
-from geoalchemy2.shape import to_shape
+from geoalchemy2.shape import to_shape, from_shape
 from sqladmin import Admin, ModelView
 from sqladmin.fields import FileField
 from starlette.datastructures import UploadFile
@@ -17,7 +18,7 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERRO
 from wtforms import StringField, Form
 
 from trailine_model.base import engine
-from trailine_model.models.course import CourseIntervalDifficulty
+from trailine_model.models.course import CourseIntervalDifficulty, CourseInterval
 from trailine_model.models.place import Place, PlaceImage
 from trailine_model.models.user import User
 
@@ -178,7 +179,95 @@ class PlaceImageAdmin(ModelView, model=PlaceImage):
         data["url"] = s3_url
 
 
+class CourseIntervalAdmin(ModelView, model=CourseInterval):
+    form_excluded_columns = [
+        CourseInterval.created_at,
+        CourseInterval.updated_at,
+    ]
+    column_list = [
+        CourseInterval.id,
+        CourseInterval.name,
+        CourseInterval.place_a,
+        CourseInterval.place_b,
+        CourseInterval.created_at,
+        CourseInterval.updated_at,
+    ]
+    column_formatters = {
+        "place_a": lambda m, v: Markup(
+            f"<a href='/admin/place/edit/{m.place_a.id}'>{m.place_a.name}</a>"
+        ),
+        "place_b": lambda m, v: Markup(
+            f"<a href='/admin/place/edit/{m.place_b.id}'>{m.place_b.name}</a>"
+        ),
+    }
+    form_overrides = {
+        "geom": FileField,
+    }
+    form_args = {
+        "geom": {
+            "label": "JSON파일 (GPX기반)"
+        }
+    }
+
+    async def on_model_change(
+        self, data: dict, model: Any, is_created: bool, request: Request
+    ) -> None:
+        # 가상 필드인 geom_file에서 데이터를 가져옴
+        json_file: Any = data.get("geom")
+
+        # 파일이 실제로 업로드된 경우
+        if isinstance(json_file, UploadFile) and json_file.filename:
+            if json_file.content_type != "application/json":
+                raise HTTPException(
+                    status_code=HTTP_400_BAD_REQUEST,
+                    detail="JSON 파일만 업로드할 수 있습니다."
+                )
+
+            contents = await json_file.read()
+            try:
+                # JSON 데이터 추출
+                json_data = json.loads(contents)
+            except json.JSONDecodeError:
+                raise HTTPException(
+                    status_code=HTTP_400_BAD_REQUEST,
+                    detail="잘못된 형식의 JSON 파일입니다."
+                )
+
+            points = json_data.get("points", [])
+            if not points or not isinstance(points, list):
+                raise HTTPException(
+                    status_code=HTTP_400_BAD_REQUEST,
+                    detail="JSON 파일에 'points' 배열이 없거나 형식이 잘못되었습니다."
+                )
+
+            try:
+                # 위경도/해발고도 추출해서 data에 반영
+                linestring_coords = []
+                for p in points:
+                    if not all(k in p for k in ["lon", "lat", "ele"]):
+                        raise ValueError("각 포인트에는 'lon', 'lat', 'ele' 키가 모두 포함되어야 합니다.")
+                    linestring_coords.append(f"{p['lon']} {p['lat']} {p['ele']}")
+
+                linestring_wkt = f"LINESTRINGZ({', '.join(linestring_coords)})"
+                data["geom"] = WKTElement(linestring_wkt, srid=4326, extended=True)
+            except (ValueError, KeyError) as e:
+                raise HTTPException(
+                    status_code=HTTP_400_BAD_REQUEST,
+                    detail=f"JSON 데이터 처리 중 오류가 발생했습니다: {e}"
+                )
+        elif is_created:  # is_created가 True인데 파일이 없는 경우
+            # 새로 생성하는 경우 파일이 반드시 필요
+            raise HTTPException(
+                status_code=HTTP_400_BAD_REQUEST,
+                detail="새로운 구간을 생성하려면 JSON 파일이 필요합니다."
+            )
+        else:
+            # 모델에 저장하지 않을 가상 필드를 data 딕셔너리에서 항상 제거
+            data["geom"] = model.geom
+
+
 admin.add_view(UserAdmin)
 admin.add_view(CourseIntervalDifficultyAdmin)
 admin.add_view(PlaceAdmin)
 admin.add_view(PlaceImageAdmin)
+admin.add_view(CourseIntervalAdmin)
