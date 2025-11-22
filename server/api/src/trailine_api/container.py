@@ -1,6 +1,12 @@
-from dependency_injector import containers
+from dependency_injector import containers, providers
+
+from trailine_api.services.course_services import ICourseServices, CourseServices
+
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
-        modules=[]
+        packages=[
+            "trailine_api.routers.v1.course"
+        ]
     )
+    course_services: ICourseServices = providers.Factory(CourseServices)
