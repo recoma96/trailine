@@ -115,6 +115,8 @@ class Course(Base, TimeStampModel):
         "interval"
     )
 
+    images: Mapped[List["CourseImage"]] = relationship("CourseImage", back_populates="course")
+
     def __str__(self):
         return f"{self.name}"
 
@@ -140,3 +142,20 @@ class CourseCourseInterval(Base, TimeStampModel):
     def __str__(self):
         direction = "B->A" if self.is_reversed else "A->B"
         return f"<CourseID: {self.course_id} - IntervalID: {self.interval_id} ({direction}) - Pos: {self.position}>"
+
+
+class CourseImage(Base, TimeStampModel):
+    __tablename__ = "course_image"
+    __table_args__ = (
+        {"comment": "코스 이미지 리스트"}
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, comment="정렬 순서 (값이 작을 수록 앞에 둔다)")
+    url: Mapped[str] = mapped_column(String(256), nullable=False)
+    title: Mapped[str] = mapped_column(String(32), nullable=True)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    course_id: Mapped[int] = mapped_column(ForeignKey("course.id", onupdate="CASCADE", ondelete="SET NULL"),
+                                           nullable=True)
+
+    course: Mapped[Course] = relationship("Course", back_populates="images")
