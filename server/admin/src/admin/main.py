@@ -11,6 +11,7 @@ from fastapi import FastAPI, HTTPException
 from geoalchemy2 import WKTElement
 from geoalchemy2.shape import to_shape
 from sqladmin import Admin, ModelView
+from sqlalchemy.orm import selectinload
 from sqladmin.fields import FileField
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
@@ -18,7 +19,14 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERRO
 from wtforms import StringField, Form
 
 from trailine_model.base import engine
-from trailine_model.models.course import CourseIntervalDifficulty, CourseInterval, CourseDifficulty, CourseStyle
+from trailine_model.models.course import (
+    CourseIntervalDifficulty,
+    CourseInterval,
+    CourseDifficulty,
+    CourseStyle,
+    Course,
+    CourseCourseInterval
+)
 from trailine_model.models.place import Place, PlaceImage
 from trailine_model.models.user import User
 
@@ -183,6 +191,7 @@ class CourseIntervalAdmin(ModelView, model=CourseInterval):
     form_excluded_columns = [
         CourseInterval.created_at,
         CourseInterval.updated_at,
+        CourseInterval.courses,
     ]
     column_list = [
         CourseInterval.id,
@@ -294,6 +303,30 @@ class CourseStyleAdmin(ModelView, model=CourseStyle):
     ]
 
 
+class CourseAdmin(ModelView, model=Course):
+    form_excluded_columns = [
+        Course.created_at,
+        Course.updated_at,
+    ]
+    column_list = [
+        Course.id,
+        Course.name,
+        Course.course_difficulty,
+    ]
+
+
+class CourseCourseIntervalAdmin(ModelView, model=CourseCourseInterval):
+    form_excluded_columns = [
+        CourseCourseInterval.created_at,
+        CourseCourseInterval.updated_at,
+    ]
+    column_list = [
+        CourseCourseInterval.id,
+        CourseCourseInterval.course,
+        CourseCourseInterval.interval,
+    ]
+
+
 admin.add_view(UserAdmin)
 admin.add_view(CourseIntervalDifficultyAdmin)
 admin.add_view(PlaceAdmin)
@@ -301,3 +334,5 @@ admin.add_view(PlaceImageAdmin)
 admin.add_view(CourseIntervalAdmin)
 admin.add_view(CourseDifficultyAdmin)
 admin.add_view(CourseStyleAdmin)
+admin.add_view(CourseAdmin)
+admin.add_view(CourseCourseIntervalAdmin)
