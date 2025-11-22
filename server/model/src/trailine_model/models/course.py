@@ -124,7 +124,7 @@ class Course(Base, TimeStampModel):
 class CourseCourseInterval(Base, TimeStampModel):
     __tablename__ = "course_course_interval"
     __table_args__ = (
-        UniqueConstraint("course_id", "interval_id", "position", name="course_course_interval_unique"),
+        UniqueConstraint("course_id", "interval_id", "position", "is_reversed", name="course_course_interval_unique"),
         {"comment": "코스 - 구간 사이의 중간 테이블"}
     )
 
