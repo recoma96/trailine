@@ -57,3 +57,15 @@ class CourseInterval(Base, TimeStampModel):
     place_a: Mapped[Place] = relationship(foreign_keys=[place_a_id])
     place_b: Mapped[Place] = relationship(foreign_keys=[place_b_id])
     difficulty: Mapped[CourseIntervalDifficulty] = relationship(foreign_keys=[course_interval_difficulty_id])
+
+
+class CourseStyle(Base, TimeStampModel):
+    __tablename__ = "course_style"
+    __table_args__ = {
+        "comment": "코스 형식(스타일)"
+    }
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(16), nullable=False, unique=True, comment="코드명")
+    name: Mapped[str] = mapped_column(String(16), nullable=False, comment="이름(한글)")
+    description: Mapped[str] = mapped_column(Text, nullable=True)

@@ -18,7 +18,7 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERRO
 from wtforms import StringField, Form
 
 from trailine_model.base import engine
-from trailine_model.models.course import CourseIntervalDifficulty, CourseInterval, CourseDifficulty
+from trailine_model.models.course import CourseIntervalDifficulty, CourseInterval, CourseDifficulty, CourseStyle
 from trailine_model.models.place import Place, PlaceImage
 from trailine_model.models.user import User
 
@@ -281,9 +281,23 @@ class CourseDifficultyAdmin(ModelView, model=CourseDifficulty):
     column_default_sort = [(CourseDifficulty.level, False)]
 
 
+class CourseStyleAdmin(ModelView, model=CourseStyle):
+    form_excluded_columns = [
+        CourseStyle.created_at,
+        CourseStyle.updated_at,
+    ]
+    column_list = [
+        CourseStyle.code,
+        CourseStyle.name,
+        CourseStyle.created_at,
+        CourseStyle.updated_at,
+    ]
+
+
 admin.add_view(UserAdmin)
 admin.add_view(CourseIntervalDifficultyAdmin)
 admin.add_view(PlaceAdmin)
 admin.add_view(PlaceImageAdmin)
 admin.add_view(CourseIntervalAdmin)
 admin.add_view(CourseDifficultyAdmin)
+admin.add_view(CourseStyleAdmin)
