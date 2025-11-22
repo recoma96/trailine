@@ -15,11 +15,13 @@ class _CommonConfig:
 class _DevConfig(_CommonConfig):
     class S3(_CommonConfig.S3):
         BASE_PLACE_PATH = "dev/public/place"
+        BASE_COURSE_PATH = "dev/public/course"
 
 
 class _ProdConfig(_CommonConfig):
     class S3(_CommonConfig.S3):
         BASE_PLACE_PATH = "public/place"
+        BASE_COURSE_PATH = "public/course"
 
 
 IS_TEST: bool = (os.getenv("IS_TEST") == "1")

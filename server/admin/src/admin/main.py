@@ -18,12 +18,19 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERRO
 from wtforms import StringField, Form
 
 from trailine_model.base import engine
-from trailine_model.models.course import CourseIntervalDifficulty, CourseInterval, CourseDifficulty, CourseStyle
+from trailine_model.models.course import (
+    CourseIntervalDifficulty,
+    CourseInterval,
+    CourseDifficulty,
+    CourseStyle,
+    Course,
+    CourseCourseInterval, CourseImage
+)
 from trailine_model.models.place import Place, PlaceImage
 from trailine_model.models.user import User
 
 from .config import config
-
+from .utils import upload_image_to_s3
 
 app = FastAPI()
 admin = Admin(app, engine)
@@ -138,51 +145,15 @@ class PlaceImageAdmin(ModelView, model=PlaceImage):
         self, data: dict, model: Any, is_created: bool, request: Request
     ) -> None:
         image: UploadFile = data.get("url")
-
-        # 이미지가 첨부되었는지, 이미지 파일이 맞는지 확인합니다.
-        if not image or not image.filename:
-            raise HTTPException(
-                status_code=HTTP_400_BAD_REQUEST,
-                detail="이미지 파일이 필요합니다."
-            )
-        if not image.content_type.startswith("image/"):
-            raise HTTPException(
-                status_code=HTTP_400_BAD_REQUEST,
-                detail="이미지 파일만 업로드할 수 있습니다."
-            )
-
-        # S3 업로드 설정
-        s3_client = boto3.client("s3")
-
-        # 파일 확장자 및 새로운 파일명 생성
-        _, ext = os.path.splitext(image.filename)
-        new_filename = f"{uuid.uuid4()}{ext}"
         place_id = data.get("place")
-        s3_path = f"{config.S3.BASE_PLACE_PATH}/{place_id}/images/{new_filename}"
-
-        try:
-            # S3에 파일 업로드
-            s3_client.upload_fileobj(
-                image.file,
-                config.S3.BUCKET_NAME,
-                s3_path,
-                ExtraArgs={"ContentType": image.content_type},
-            )
-        except NoCredentialsError:
-            raise HTTPException(
-                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="AWS 자격 증명 정보를 찾을 수 없습니다."
-            )
-
-        # 데이터베이스에 저장할 S3 URL 생성
-        s3_url = f"{config.S3.IMAGE_PUBLIC_BASE_URL}/{s3_path}"
-        data["url"] = s3_url
+        data["url"] = upload_image_to_s3(image, config.S3.BASE_PLACE_PATH, f"{place_id}/images")
 
 
 class CourseIntervalAdmin(ModelView, model=CourseInterval):
     form_excluded_columns = [
         CourseInterval.created_at,
         CourseInterval.updated_at,
+        CourseInterval.courses,
     ]
     column_list = [
         CourseInterval.id,
@@ -294,6 +265,58 @@ class CourseStyleAdmin(ModelView, model=CourseStyle):
     ]
 
 
+class CourseAdmin(ModelView, model=Course):
+    form_excluded_columns = [
+        Course.created_at,
+        Course.updated_at,
+    ]
+    column_list = [
+        Course.id,
+        Course.name,
+        Course.course_difficulty,
+    ]
+
+
+class CourseCourseIntervalAdmin(ModelView, model=CourseCourseInterval):
+    form_excluded_columns = [
+        CourseCourseInterval.created_at,
+        CourseCourseInterval.updated_at,
+    ]
+    column_list = [
+        CourseCourseInterval.id,
+        CourseCourseInterval.course,
+        CourseCourseInterval.interval,
+        CourseCourseInterval.is_reversed,
+    ]
+
+
+class CourseImageAdmin(ModelView, model=CourseImage):
+    form_overrides = {"url": FileField}
+    form_args = {
+        "url": {
+            "label": "Image"
+        }
+    }
+    column_formatters = {
+        "url": lambda m, v: (
+            Markup(f'<img src="{m.url}" style="max-height: 300px;">')
+        )
+    }
+    column_list = [
+        CourseImage.course,
+        CourseImage.sort_order,
+        CourseImage.url,
+    ]
+    form_excluded_columns = [CourseImage.created_at, CourseImage.updated_at]
+
+    async def on_model_change(
+        self, data: dict, model: Any, is_created: bool, request: Request
+    ) -> None:
+        image: UploadFile = data.get("url")
+        course_id = data.get("course")
+        data["url"] = upload_image_to_s3(image, config.S3.BASE_COURSE_PATH, f"{course_id}/images")
+
+
 admin.add_view(UserAdmin)
 admin.add_view(CourseIntervalDifficultyAdmin)
 admin.add_view(PlaceAdmin)
@@ -301,3 +324,6 @@ admin.add_view(PlaceImageAdmin)
 admin.add_view(CourseIntervalAdmin)
 admin.add_view(CourseDifficultyAdmin)
 admin.add_view(CourseStyleAdmin)
+admin.add_view(CourseAdmin)
+admin.add_view(CourseCourseIntervalAdmin)
+admin.add_view(CourseImageAdmin)
