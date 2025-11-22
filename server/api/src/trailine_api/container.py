@@ -1,4 +1,5 @@
 from dependency_injector import containers, providers
+from dependency_injector.providers import Factory
 
 from trailine_api.services.course_services import ICourseServices, CourseServices
 
@@ -9,4 +10,4 @@ class Container(containers.DeclarativeContainer):
             "trailine_api.routers.v1.course"
         ]
     )
-    course_services: ICourseServices = providers.Factory(CourseServices)
+    course_services: Factory[ICourseServices] = Factory(CourseServices)
