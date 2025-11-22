@@ -324,6 +324,7 @@ class CourseCourseIntervalAdmin(ModelView, model=CourseCourseInterval):
         CourseCourseInterval.id,
         CourseCourseInterval.course,
         CourseCourseInterval.interval,
+        CourseCourseInterval.is_reversed,
     ]
 
 

@@ -131,9 +131,12 @@ class CourseCourseInterval(Base, TimeStampModel):
     interval_id: Mapped[int] = mapped_column(ForeignKey("course_interval.id", ondelete="RESTRICT"), nullable=False)
     # Interval을 삭제할 경우 공개된 Course 정보에 손상이 가기 때문에 RESTRICT로 설정
     position: Mapped[int] = mapped_column(Integer, nullable=False, comment="구간 순서")
+    is_reversed: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"),
+                                              comment="구간 역방향 여부 (기본: place_a -> place_b)")
 
     course: Mapped["Course"] = relationship(back_populates="_interval_associations")
     interval: Mapped["CourseInterval"] = relationship(back_populates="courses")
 
     def __str__(self):
-        return f"<CourseID: {self.course_id} - IntervalID: {self.interval_id} - Position: {self.position}>"
+        direction = "B->A" if self.is_reversed else "A->B"
+        return f"<CourseID: {self.course_id} - IntervalID: {self.interval_id} ({direction}) - Pos: {self.position}>"
