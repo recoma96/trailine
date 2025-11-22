@@ -9,7 +9,7 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 from fastapi import FastAPI, HTTPException
 from geoalchemy2 import WKTElement
-from geoalchemy2.shape import to_shape, from_shape
+from geoalchemy2.shape import to_shape
 from sqladmin import Admin, ModelView
 from sqladmin.fields import FileField
 from starlette.datastructures import UploadFile
@@ -18,7 +18,7 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERRO
 from wtforms import StringField, Form
 
 from trailine_model.base import engine
-from trailine_model.models.course import CourseIntervalDifficulty, CourseInterval
+from trailine_model.models.course import CourseIntervalDifficulty, CourseInterval, CourseDifficulty
 from trailine_model.models.place import Place, PlaceImage
 from trailine_model.models.user import User
 
@@ -51,13 +51,13 @@ class CourseIntervalDifficultyAdmin(ModelView, model=CourseIntervalDifficulty):
         CourseIntervalDifficulty.updated_at
     ]
     column_list = [
-        CourseIntervalDifficulty.id,
         CourseIntervalDifficulty.level,
         CourseIntervalDifficulty.code,
         CourseIntervalDifficulty.name,
         CourseIntervalDifficulty.created_at,
         CourseIntervalDifficulty.updated_at
     ]
+    column_default_sort = [(CourseIntervalDifficulty.level, False)]
 
 
 class PlaceAdmin(ModelView, model=Place):
@@ -266,8 +266,24 @@ class CourseIntervalAdmin(ModelView, model=CourseInterval):
             data["geom"] = model.geom
 
 
+class CourseDifficultyAdmin(ModelView, model=CourseDifficulty):
+    form_excluded_columns = [
+        CourseDifficulty.created_at,
+        CourseDifficulty.updated_at,
+    ]
+    column_list = [
+        CourseDifficulty.level,
+        CourseDifficulty.code,
+        CourseDifficulty.name,
+        CourseDifficulty.created_at,
+        CourseDifficulty.updated_at,
+    ]
+    column_default_sort = [(CourseDifficulty.level, False)]
+
+
 admin.add_view(UserAdmin)
 admin.add_view(CourseIntervalDifficultyAdmin)
 admin.add_view(PlaceAdmin)
 admin.add_view(PlaceImageAdmin)
 admin.add_view(CourseIntervalAdmin)
+admin.add_view(CourseDifficultyAdmin)
