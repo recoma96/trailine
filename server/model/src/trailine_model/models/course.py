@@ -90,10 +90,9 @@ class Course(Base, TimeStampModel):
     course_difficulty: Mapped[CourseDifficulty] = relationship(foreign_keys=[course_difficulty_id])
     course_style: Mapped[CourseStyle] = relationship(foreign_keys=[course_style_id])
     intervals: Mapped[List[CourseInterval]] = relationship(
-        back_populates="course_interval",
-        order_by="CourseInterval.position",
-        cascade="all, delete-orphan",
-        passive_deletes=True, # CASCADE를 DB에 맡기는 구조
+        secondary="course_course_interval",
+        order_by="CourseCourseInterval.position",
+        cascade="save-update, merge, delete",
     )
 
 
