@@ -1,5 +1,7 @@
+from typing import List
+
 from geoalchemy2 import Geometry, WKBElement
-from sqlalchemy import Integer, String, SmallInteger, Text, ForeignKey, CheckConstraint
+from sqlalchemy import Integer, String, SmallInteger, Text, ForeignKey, CheckConstraint, Boolean, text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from trailine_model.base import Base, TimeStampModel
@@ -69,3 +71,41 @@ class CourseStyle(Base, TimeStampModel):
     code: Mapped[str] = mapped_column(String(16), nullable=False, unique=True, comment="코드명")
     name: Mapped[str] = mapped_column(String(16), nullable=False, comment="이름(한글)")
     description: Mapped[str] = mapped_column(Text, nullable=True)
+
+
+class Course(Base, TimeStampModel):
+    __tablename__ = "course"
+    __table_args__ = {
+        "comment": "코스",
+    }
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(32), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    is_published: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
+
+    course_difficulty_id: Mapped[int] = mapped_column(ForeignKey("course_difficulty.id"), nullable=False)
+    course_style_id: Mapped[int] = mapped_column(ForeignKey("course_style.id"), nullable=False)
+
+    course_difficulty: Mapped[CourseDifficulty] = relationship(foreign_keys=[course_difficulty_id])
+    course_style: Mapped[CourseStyle] = relationship(foreign_keys=[course_style_id])
+    intervals: Mapped[List[CourseInterval]] = relationship(
+        back_populates="course_interval",
+        order_by="CourseInterval.position",
+        cascade="all, delete-orphan",
+        passive_deletes=True, # CASCADE를 DB에 맡기는 구조
+    )
+
+
+class CourseCourseInterval(Base, TimeStampModel):
+    __tablename__ = "course_course_interval"
+    __table_args__ = (
+        UniqueConstraint("course_id", "interval_id", "position", name="course_course_interval_unique"),
+        {"comment": "코스 - 구간 사이의 중간 테이블"}
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    course_id: Mapped[int] = mapped_column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
+    interval_id: Mapped[int] = mapped_column(ForeignKey("course_interval.id", ondelete="RESTRICT"), nullable=False)
+    # Interval을 삭제할 경우 공개된 Course 정보에 손상이 가기 때문에 RESTRICT로 설정
+    position: Mapped[int] = mapped_column(Integer, nullable=False, comment="구간 순서")
