@@ -6,6 +6,7 @@ from fastapi import status
 from fastapi.params import Depends
 
 from trailine_api.container import Container
+from trailine_api.schemas.course import CourseSearchResponseSchema
 from trailine_api.services.course_services import ICourseServices
 
 
@@ -13,13 +14,13 @@ router = APIRouter()
 
 
 @router.get(
-    "/",
+    "",
     status_code=status.HTTP_200_OK,
-    response_model=List[str],
     summary="연관 검색어 조회",
+    response_model=CourseSearchResponseSchema,
 )
 @inject
-def get_courses(
+async def get_courses(
     course_service: Annotated[ICourseServices, Depends(Provide[Container.course_services])],
     word: Optional[str] = Query(
         None,
@@ -27,6 +28,14 @@ def get_courses(
         max_length=50,
         title="검색어 (코스명 또는 주소)",
         description="연관 검색어를 조회할 검색어",
-    )
+    ),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100, alias="pageSize"),
 ):
-    return []
+    courses = course_service.get_courses(word, page, page_size)
+    return CourseSearchResponseSchema(
+        page=page,
+        pageSize=page_size,
+        total=len(courses),
+        courses=courses,
+    )
