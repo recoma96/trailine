@@ -29,10 +29,25 @@ async def get_courses(
         title="검색어 (코스명 또는 주소)",
         description="연관 검색어를 조회할 검색어",
     ),
+    difficulty: Optional[List[int]] = Query(
+        None,
+        description="난이도 식별아이디",
+    ),
+    course_style: Optional[List[int]] = Query(
+        None,
+        alias="courseStyle",
+        description="코스 스타일 식별아이디",
+    ),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100, alias="pageSize"),
 ):
-    courses = course_service.get_courses(word, page, page_size)
+    courses = course_service.get_courses(
+        word,
+        difficulty,
+        course_style,
+        page,
+        page_size
+    )
     return CourseSearchResponseSchema(
         page=page,
         pageSize=page_size,

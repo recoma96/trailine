@@ -13,14 +13,30 @@ class ICourseServices(metaclass=ABCMeta):
         self._course_repository = course_repository
 
     @abstractmethod
-    def get_courses(self, word: Optional[str], page: int, page_size: int) -> List[CourseSearchSchema]:
+    def get_courses(
+            self,
+            word: Optional[str],
+            difficulties: Optional[List[int]],
+            course_styles: Optional[List[int]],
+            page: int,
+            page_size: int
+    ) -> List[CourseSearchSchema]:
         pass
 
 
 class CourseServices(ICourseServices):
-    def get_courses(self, word: Optional[str], page: int, page_size: int) -> List[CourseSearchSchema]:
+    def get_courses(
+            self,
+            word: Optional[str],
+            difficulties: Optional[List[int]],
+            course_styles: Optional[List[int]],
+            page: int,
+            page_size: int
+    ) -> List[CourseSearchSchema]:
         with (Session(engine) as session, session.begin()):
-            course_id_list = self._course_repository.get_course_ids_by_search(session, word, page, page_size)
+            course_id_list = self._course_repository.get_course_ids_by_search(
+                session, word, difficulties, course_styles, page, page_size
+            )
             data_size = len(course_id_list)
             result_index_map = {
                 course_id: idx

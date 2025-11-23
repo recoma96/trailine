@@ -10,7 +10,15 @@ from trailine_model.models.course import Course, CourseCourseInterval, CourseInt
 
 class ICourseRepository(metaclass=ABCMeta):
     @abstractmethod
-    def get_course_ids_by_search(self, session: Session, word: Optional[str], page: int, page_size: int) -> Sequence[int]:
+    def get_course_ids_by_search(
+            self,
+            session: Session,
+            word: Optional[str],
+            difficulties: Optional[List[int]],
+            course_styles: Optional[List[int]],
+            page: int,
+            page_size: int
+    ) -> Sequence[int]:
         pass
 
     @abstractmethod
@@ -22,7 +30,15 @@ class ICourseRepository(metaclass=ABCMeta):
 
 
 class CourseRepository(ICourseRepository):
-    def get_course_ids_by_search(self, session: Session, word: Optional[str], page: int, page_size: int) -> Sequence[int]:
+    def get_course_ids_by_search(
+            self,
+            session: Session,
+            word: Optional[str],
+            difficulties: Optional[List[int]],
+            course_styles: Optional[List[int]],
+            page: int,
+            page_size: int
+    ) -> Sequence[int]:
         # place_a, place_b를 조인하기 위해 별칭(alias)을 사용합니다.
         place_a, place_b = aliased(Place), aliased(Place)
 
@@ -45,6 +61,10 @@ class CourseRepository(ICourseRepository):
                     place_b.road_address.like(word_s)
                 )
             )
+        if difficulties:
+            stmt = stmt.where(Course.course_difficulty_id.in_(difficulties))
+        if course_styles:
+            stmt = stmt.where(Course.course_style_id.in_(course_styles))
 
         # Course.id로 그룹화하고, 정렬 및 페이지네이션을 적용합니다.
         stmt = (
