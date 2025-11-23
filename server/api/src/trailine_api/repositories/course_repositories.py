@@ -5,7 +5,13 @@ from sqlalchemy import select, or_, func, cast, Integer, values, literal, litera
 from sqlalchemy.orm import Session, aliased
 
 from trailine_model.models.place import Place
-from trailine_model.models.course import Course, CourseCourseInterval, CourseInterval, CourseDifficulty
+from trailine_model.models.course import (
+    Course,
+    CourseCourseInterval,
+    CourseInterval,
+    CourseDifficulty,
+    CourseStyle
+)
 
 
 class ICourseRepository(metaclass=ABCMeta):
@@ -107,12 +113,16 @@ class CourseRepository(ICourseRepository):
                 CourseDifficulty.id.label("difficulty_id"),
                 CourseDifficulty.level.label("difficulty_level"),
                 CourseDifficulty.code.label("difficulty_code"),
+                CourseStyle.id.label("course_style_id"),
+                CourseStyle.code.label("course_style_label"),
+                CourseStyle.name.label("course_style_name"),
                 land_addr.c.land_addrs.label("land_addresses"),
                 road_addr.c.road_addrs.label("road_addresses"),
             )
             .join(CourseCourseInterval, Course.id == CourseCourseInterval.course_id)
-            .join(CourseDifficulty, Course.course_difficulty_id == CourseDifficulty.id)
             .join(CourseInterval, CourseCourseInterval.interval_id == CourseInterval.id)
+            .join(CourseDifficulty, Course.course_difficulty_id == CourseDifficulty.id)
+            .join(CourseStyle, Course.course_style_id == CourseStyle.id)
             .join(place_a, CourseInterval.place_a_id == place_a.id)
             .join(place_b, CourseInterval.place_b_id == place_b.id)
             .join(land_addr, literal(True))

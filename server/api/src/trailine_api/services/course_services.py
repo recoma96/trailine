@@ -4,7 +4,7 @@ from typing import Optional, List, cast
 from sqlalchemy.orm import Session
 
 from trailine_api.repositories.course_repositories import ICourseRepository
-from trailine_api.schemas.course import CourseSearchSchema, CourseDifficultySchema
+from trailine_api.schemas.course import CourseSearchSchema, CourseDifficultySchema, CourseStyleSchema
 from trailine_model.base import engine
 
 
@@ -66,6 +66,11 @@ class CourseServices(ICourseServices):
                         id=row["difficulty_id"],
                         level=row["difficulty_level"],
                         code=row["difficulty_code"],
+                    ),
+                    courseStyle=CourseStyleSchema(
+                        id=row["course_style_id"],
+                        code=row["course_style_label"],
+                        name=row["course_style_name"],
                     )
                 )
             # 5. 이미 객체가 있으면 주소만 추가
