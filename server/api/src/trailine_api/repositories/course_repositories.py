@@ -34,7 +34,7 @@ class CourseRepository(ICourseRepository):
             .join(place_b, CourseInterval.place_b_id == place_b.id)  # p2
         )
 
-        word_s: Optional[str] = f"%{word}%" if word else None
+        word_s: str = f"%{word}%" if word else ""
         if word:
             stmt = stmt.where(
                 or_(
