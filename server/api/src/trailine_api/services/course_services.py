@@ -1,11 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, List, cast
 
-from sqlalchemy.orm import Session
-
 from trailine_api.repositories.course_repositories import ICourseRepository
 from trailine_api.schemas.course import CourseSearchSchema, CourseDifficultySchema, CourseStyleSchema
-from trailine_model.base import engine
+from trailine_model.base import SessionLocal
 
 
 class ICourseServices(metaclass=ABCMeta):
@@ -33,7 +31,7 @@ class CourseServices(ICourseServices):
             page: int,
             page_size: int
     ) -> List[CourseSearchSchema]:
-        with (Session(engine) as session, session.begin()):
+        with (SessionLocal() as session, session.begin()):
             course_id_list = self._course_repository.get_course_ids_by_search(
                 session, word, difficulties, course_styles, page, page_size
             )
