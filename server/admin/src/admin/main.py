@@ -1,12 +1,8 @@
-import os
 import re
-import uuid
 from typing import Any, List, Type
 from markupsafe import Markup
 import json
 
-import boto3
-from botocore.exceptions import NoCredentialsError
 from fastapi import FastAPI, HTTPException
 from geoalchemy2 import WKTElement
 from geoalchemy2.shape import to_shape
@@ -14,7 +10,7 @@ from sqladmin import Admin, ModelView
 from sqladmin.fields import FileField
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
+from starlette.status import HTTP_400_BAD_REQUEST
 from wtforms import StringField, Form
 
 from trailine_model.base import engine
@@ -24,7 +20,9 @@ from trailine_model.models.course import (
     CourseDifficulty,
     CourseStyle,
     Course,
-    CourseCourseInterval, CourseImage
+    CourseCourseInterval,
+    CourseImage,
+    CourseIntervalImage
 )
 from trailine_model.models.place import Place, PlaceImage
 from trailine_model.models.user import User
@@ -317,6 +315,34 @@ class CourseImageAdmin(ModelView, model=CourseImage):
         data["url"] = upload_image_to_s3(image, config.S3.BASE_COURSE_PATH, f"{course_id}/images")
 
 
+class CourseIntervalImageAdmin(ModelView, model=CourseIntervalImage):
+    form_overrides = {"url": FileField}
+    form_args = {
+        "url": {
+            "label": "Image"
+        }
+    }
+    column_formatters = {
+        "url": lambda m, v: (
+            Markup(f'<img src="{m.url}" style="max-height: 300px;">')
+        )
+    }
+    column_list = [
+        CourseIntervalImage.course_interval,
+        CourseIntervalImage.sort_order,
+        CourseIntervalImage.url,
+    ]
+    form_excluded_columns = [CourseIntervalImage.created_at, CourseIntervalImage.updated_at]
+
+    async def on_model_change(
+        self, data: dict, model: Any, is_created: bool, request: Request
+    ) -> None:
+        image: UploadFile = data.get("url")
+        interval_id = data.get("course_interval")
+        data["url"] = upload_image_to_s3(image, config.S3.BASE_COURSE_INTERVAL_PATH, f"{interval_id}/images")
+
+
+
 admin.add_view(UserAdmin)
 admin.add_view(CourseIntervalDifficultyAdmin)
 admin.add_view(PlaceAdmin)
@@ -327,3 +353,4 @@ admin.add_view(CourseStyleAdmin)
 admin.add_view(CourseAdmin)
 admin.add_view(CourseCourseIntervalAdmin)
 admin.add_view(CourseImageAdmin)
+admin.add_view(CourseIntervalImageAdmin)
