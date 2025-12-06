@@ -22,7 +22,6 @@ engine = create_engine(
     pool_size=int(os.getenv("DB_POOL_SIZE", "10")),
     max_overflow=int(os.getenv("DB_POOL_MAX_OVERFLOW", "20")),
     pool_pre_ping=True,
-    echo=True,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
