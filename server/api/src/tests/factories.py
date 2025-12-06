@@ -9,7 +9,9 @@ from trailine_model.models.course import (
     CourseDifficulty,
     CourseStyle,
     Course,
-    CourseCourseInterval
+    CourseCourseInterval,
+    CourseImage,
+    CourseIntervalImage
 )
 from trailine_model.models.place import Place
 
@@ -49,6 +51,16 @@ class CourseIntervalDifficultyFactory(BaseFactory):
     description = factory.Faker("sentence")
 
 
+class CourseIntervalImageFactory(BaseFactory):
+    class Meta:
+        model = CourseIntervalImage
+
+    sort_order = factory.fuzzy.FuzzyInteger(1)
+    url = factory.Faker("image_url")
+    title = factory.Faker("name")
+    description = factory.Faker("sentence")
+
+
 class CourseIntervalFactory(BaseFactory):
     class Meta:
         model = CourseInterval
@@ -73,6 +85,9 @@ class CourseIntervalFactory(BaseFactory):
     place_b = factory.SubFactory(PlaceFactory)
     difficulty = factory.SubFactory(CourseIntervalDifficultyFactory)
 
+    # CourseInterval 생성 시 CourseImage 2개를 함께 생성합니다.
+    images = factory.List([factory.SubFactory(CourseIntervalImageFactory) for _ in range(2)])
+
 
 class CourseDifficultyFactory(BaseFactory):
     class Meta:
@@ -91,6 +106,17 @@ class CourseStyleFactory(BaseFactory):
     code = factory.LazyFunction(lambda: fake.user_name()[:16])
     name = factory.LazyFunction(lambda: fake.name()[:16])
     description = factory.Faker("sentence")
+
+
+class CourseImageFactory(BaseFactory):
+    class Meta:
+        model = CourseImage
+
+    sort_order = factory.fuzzy.FuzzyInteger(1)
+    url = factory.Faker("image_url")
+    title = factory.Faker("name")
+    description = factory.Faker("sentence")
+    course_id = factory.LazyFunction(lambda cid: cid)
 
 
 class CourseFactory(BaseFactory):

@@ -1,13 +1,14 @@
 from typing import List, Annotated, Optional
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Query
-from fastapi import status
+from fastapi import APIRouter, Query, Path
+from fastapi import status, HTTPException
 from fastapi.params import Depends
 
 from trailine_api.container import Container
-from trailine_api.schemas.course import CourseSearchResponseSchema
-from trailine_api.services.course_services import ICourseServices
+from trailine_api.schemas.course import CourseSearchResponseSchema, CourseDetailSchema, \
+    GettingCourseIntervalResponseSchema
+from trailine_api.services.course_services import ICourseService
 
 
 router = APIRouter()
@@ -21,7 +22,7 @@ router = APIRouter()
 )
 @inject
 async def get_courses(
-    course_service: Annotated[ICourseServices, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
     word: Optional[str] = Query(
         None,
         min_length=1,
@@ -53,4 +54,46 @@ async def get_courses(
         pageSize=page_size,
         total=len(courses),
         courses=courses,
+    )
+
+
+@router.get(
+    "/{course_id}",
+    status_code=status.HTTP_200_OK,
+    summary="코스 상세정보 조회",
+    response_model=CourseDetailSchema,
+)
+@inject
+async def get_course_detail(
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_id: int = Path(..., description="코스 고유 아이디"),
+):
+    course = course_service.get_course_detail(course_id)
+    if not course:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="코스를 찾을 수 없습니다.")
+    return course
+
+
+@router.get(
+    "/{course_id}/intervals",
+    status_code=status.HTTP_200_OK,
+    summary="코스 경로 조회",
+    response_model=GettingCourseIntervalResponseSchema
+)
+@inject
+async def get_course_intervals(
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_id: int = Path(..., description="코스 고유 아이디"),
+):
+    intervals = course_service.get_course_intervals(course_id)
+
+    if not intervals:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="해당 코스에 대한 구간을 찾을 수 없어요."
+        )
+
+    return GettingCourseIntervalResponseSchema(
+        intervalCount=len(intervals),
+        intervals=intervals,
     )
