@@ -8,7 +8,7 @@ from fastapi.params import Depends
 from trailine_api.container import Container
 from trailine_api.schemas.course import CourseSearchResponseSchema, CourseDetailSchema, \
     GettingCourseIntervalResponseSchema
-from trailine_api.services.course_services import ICourseServices
+from trailine_api.services.course_services import ICourseService
 
 
 router = APIRouter()
@@ -22,7 +22,7 @@ router = APIRouter()
 )
 @inject
 async def get_courses(
-    course_service: Annotated[ICourseServices, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
     word: Optional[str] = Query(
         None,
         min_length=1,
@@ -65,7 +65,7 @@ async def get_courses(
 )
 @inject
 async def get_course_detail(
-    course_service: Annotated[ICourseServices, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
     course_id: int = Path(..., description="코스 고유 아이디"),
 ):
     course = course_service.get_course_detail(course_id)
@@ -82,7 +82,7 @@ async def get_course_detail(
 )
 @inject
 async def get_course_intervals(
-    course_service: Annotated[ICourseServices, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
     course_id: int = Path(..., description="코스 고유 아이디"),
 ):
     intervals = course_service.get_course_intervals(course_id)

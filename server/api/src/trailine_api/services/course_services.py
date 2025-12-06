@@ -21,7 +21,7 @@ from trailine_model.models.place import Place
 from trailine_model.models.course import CourseInterval
 
 
-class ICourseServices(metaclass=ABCMeta):
+class ICourseService(metaclass=ABCMeta):
     _course_repository: ICourseRepository
     _place_repository: IPlaceRepository
 
@@ -53,7 +53,7 @@ class ICourseServices(metaclass=ABCMeta):
         pass
 
 
-class CourseServices(ICourseServices):
+class CourseService(ICourseService):
     def get_courses(
             self,
             word: Optional[str],
