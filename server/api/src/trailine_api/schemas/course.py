@@ -1,6 +1,9 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
+from trailine_api.schemas.place import PlaceSchema
+from trailine_api.schemas.point import PointSchema
+
 
 class CourseDifficultySchema(BaseModel):
     id: int = Field(..., description="코스난이도 식별자")
@@ -45,3 +48,31 @@ class CourseDetailSchema(BaseModel):
     difficulty: CourseDifficultySchema = Field(..., description="코스 난이도 정보")
     course_style: CourseStyleSchema = Field(..., alias="courseStyle", description="코스 스타일")
     images: List[CourseImageSchema] = Field(..., description="코스 이미지 리스트 (sort_order 오름차순으로 정렬)")
+
+
+class CourseIntervalImageSchema(BaseModel):
+    title: Optional[str] = Field(..., description="이미지 제목")
+    description: Optional[str] = Field(..., description="이미지 설명")
+    url: str = Field(..., description="이미지 URL")
+
+
+class CourseIntervalDifficultySchema(BaseModel):
+    id: int = Field(..., description="난이도 고유아이디")
+    code: str = Field(..., description="난이도 고유 코드 (혹은 영문명)")
+    name: str = Field(..., description="난이도 이름 (한글명)")
+    level: int = Field(..., description="난이도 수치")
+
+
+class CourseIntervalSchema(BaseModel):
+    name: str = Field(..., description="구간명")
+    description: Optional[str] = Field(..., description="설명")
+    images: List[CourseIntervalImageSchema] = Field(..., description="이미지 리스트 (sort_order 오름차순으로 정렬)")
+    difficulty: CourseIntervalDifficultySchema = Field(..., description="난이도 정보")
+    start_place: PlaceSchema = Field(...,alias="startPlace", description="시작지점")
+    end_place: PlaceSchema = Field(..., alias="endPlace", description="종료지점")
+    points: List[PointSchema] = Field(..., description="포인트(위경도) 경로")
+
+
+class GettingCourseIntervalResponseSchema(BaseModel):
+    interval_count: int = Field(..., alias="intervalCount", description="구간 수")
+    intervals: List[CourseIntervalSchema] = Field(..., description="구간들 (순서대로)")

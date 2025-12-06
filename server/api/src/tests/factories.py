@@ -9,7 +9,9 @@ from trailine_model.models.course import (
     CourseDifficulty,
     CourseStyle,
     Course,
-    CourseCourseInterval, CourseImage
+    CourseCourseInterval,
+    CourseImage,
+    CourseIntervalImage
 )
 from trailine_model.models.place import Place
 
@@ -49,6 +51,16 @@ class CourseIntervalDifficultyFactory(BaseFactory):
     description = factory.Faker("sentence")
 
 
+class CourseIntervalImageFactory(BaseFactory):
+    class Meta:
+        model = CourseIntervalImage
+
+    sort_order = factory.fuzzy.FuzzyInteger(1)
+    url = factory.Faker("image_url")
+    title = factory.Faker("name")
+    description = factory.Faker("sentence")
+
+
 class CourseIntervalFactory(BaseFactory):
     class Meta:
         model = CourseInterval
@@ -72,6 +84,9 @@ class CourseIntervalFactory(BaseFactory):
     place_a = factory.SubFactory(PlaceFactory)
     place_b = factory.SubFactory(PlaceFactory)
     difficulty = factory.SubFactory(CourseIntervalDifficultyFactory)
+
+    # CourseInterval 생성 시 CourseImage 2개를 함께 생성합니다.
+    images = factory.List([factory.SubFactory(CourseIntervalImageFactory) for _ in range(2)])
 
 
 class CourseDifficultyFactory(BaseFactory):

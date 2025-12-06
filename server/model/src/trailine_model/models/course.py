@@ -67,6 +67,8 @@ class CourseInterval(Base, TimeStampModel):
         back_populates="interval",
     )
 
+    images: Mapped[List["CourseIntervalImage"]] = relationship("CourseIntervalImage", back_populates="course_interval")
+
     def __str__(self) -> str:
         # Admin에서의 Place Lazy Loading 이슈로 인해 이란 Name대신 고유 ID로 임시방편
         # TODO 추후 해당 관련 이슈 해결 필요
@@ -159,3 +161,20 @@ class CourseImage(Base, TimeStampModel):
                                            nullable=True)
 
     course: Mapped[Course] = relationship("Course", back_populates="images")
+
+
+class CourseIntervalImage(Base, TimeStampModel):
+    __tablename__ = "course_interval_image"
+    __table_args__ = (
+        {"comment": "구간 이미지 리스트"}
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, comment="정렬 순서 (값이 작을 수록 앞에 둔다)")
+    url: Mapped[str] = mapped_column(String(256), nullable=False)
+    title: Mapped[str] = mapped_column(String(32), nullable=True)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    course_interval_id: Mapped[int] = mapped_column(
+        ForeignKey("course_interval.id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
+
+    course_interval: Mapped[CourseInterval] = relationship("CourseInterval", back_populates="images")
