@@ -1,9 +1,9 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Sequence, List
+from typing import Optional, Sequence, List, Tuple
 
 from sqlalchemy import select, or_, func, cast, Integer, values, literal, literal_column
 from sqlalchemy.orm import Session, aliased
-
+from sqlalchemy.orm import selectinload
 from trailine_api.common.types import SQLRowList, SQLRow
 from trailine_model.models.place import Place
 from trailine_model.models.course import (
@@ -41,6 +41,10 @@ class ICourseRepository(metaclass=ABCMeta):
         """
         코스 상세 정보
         """
+        pass
+
+    @abstractmethod
+    def get_intervals(self, session: Session, course_id: int) -> Tuple[List[CourseInterval], List[bool]]:
         pass
 
 
@@ -198,3 +202,24 @@ class CourseRepository(ICourseRepository):
         }
 
         return data
+
+    def get_intervals(self, session: Session, course_id: int) -> Tuple[List[CourseInterval], List[bool]]:
+        stmt = (
+            select(CourseInterval, CourseCourseInterval.is_reversed.label("is_reversed"))
+            .join(CourseCourseInterval, CourseCourseInterval.interval_id == CourseInterval.id)
+            .where(CourseCourseInterval.course_id == course_id)
+            .options(selectinload(CourseInterval.images))
+            .options(selectinload(CourseInterval.difficulty))
+            .order_by(CourseCourseInterval.position)
+        )
+
+        intervals_and_is_reversed = session.execute(stmt).mappings().all()
+
+        intervals: List[CourseInterval] = []
+        is_reversed_list: List[bool] = []
+
+        for item in intervals_and_is_reversed:
+            intervals.append(item["CourseInterval"])
+            is_reversed_list.append(item["is_reversed"])
+
+        return intervals, is_reversed_list

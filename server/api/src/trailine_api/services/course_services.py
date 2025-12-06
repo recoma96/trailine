@@ -1,19 +1,37 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, List, cast
+from typing import Optional, List, cast, Tuple, Dict
+
+from geoalchemy2.shape import to_shape
+from sqlalchemy.orm import Session
 
 from trailine_api.repositories.course_repositories import ICourseRepository
+from trailine_api.repositories.place_repositories import IPlaceRepository
 from trailine_api.schemas.course import (
     CourseSearchSchema,
     CourseDifficultySchema,
     CourseStyleSchema,
-    CourseDetailSchema, CourseImageSchema
+    CourseDetailSchema,
+    CourseImageSchema,
+    CourseIntervalSchema, CourseIntervalImageSchema, CourseIntervalDifficultySchema
 )
+from trailine_api.schemas.place import PlaceSchema
+from trailine_api.schemas.point import PointSchema
 from trailine_model.base import SessionLocal
+from trailine_model.models.place import Place
+from trailine_model.models.course import CourseInterval
 
 
 class ICourseServices(metaclass=ABCMeta):
-    def __init__(self, course_repository: ICourseRepository):
+    _course_repository: ICourseRepository
+    _place_repository: IPlaceRepository
+
+    def __init__(
+            self,
+            course_repository: ICourseRepository,
+            place_repository: IPlaceRepository
+    ):
         self._course_repository = course_repository
+        self._place_repository = place_repository
 
     @abstractmethod
     def get_courses(
@@ -28,6 +46,10 @@ class ICourseServices(metaclass=ABCMeta):
 
     @abstractmethod
     def get_course_detail(self, course_id: int) -> Optional[CourseDetailSchema]:
+        pass
+
+    @abstractmethod
+    def get_course_intervals(self, course_id: int) -> Optional[List[CourseIntervalSchema]]:
         pass
 
 
@@ -118,3 +140,108 @@ class CourseServices(ICourseServices):
         )
 
         return course_detail
+
+    def get_course_intervals(self, course_id: int) -> Optional[List[CourseIntervalSchema]]:
+        interval_schemas: List[CourseIntervalSchema] = []
+        with (SessionLocal() as session, session.begin()):
+            # 구간 데이터 및 역방향 여부 가져오기
+            intervals, is_reversed_list = self._course_repository.get_intervals(session, course_id)
+            if not intervals:
+                return None
+
+            for i, interval in enumerate(intervals):
+                # 시작지점, 마감지점 가져오기
+                start_place, end_place = self._get_start_and_end_place(session, interval, is_reversed_list[i])
+                start_place_location = self._get_location_from_place(start_place)
+                end_place_location = self._get_location_from_place(end_place)
+                track_points = self._get_points(interval, is_reversed_list[i])
+
+                interval_schemas.append(CourseIntervalSchema(
+                    name=interval.name,
+                    description=interval.description,
+                    images=[
+                        CourseIntervalImageSchema(
+                            title=image.title,
+                            description=image.description,
+                            url=image.url
+                        )
+                        for image in interval.images
+                    ],
+                    difficulty=CourseIntervalDifficultySchema(
+                        id=interval.difficulty.id,
+                        code=interval.difficulty.code,
+                        name=interval.difficulty.name,
+                        level=interval.difficulty.level,
+                    ),
+                    startPlace=PlaceSchema(
+                        id=start_place.id,
+                        name=start_place.name,
+                        landAddress=start_place.land_address,
+                        roadAddress=start_place.road_address,
+                        lat=start_place_location["lat"],
+                        lon=start_place_location["lon"],
+                        ele=start_place_location["ele"],
+                    ),
+                    endPlace=PlaceSchema(
+                        id=end_place.id,
+                        name=end_place.name,
+                        landAddress=end_place.land_address,
+                        roadAddress=end_place.road_address,
+                        lat=end_place_location["lat"],
+                        lon=end_place_location["lon"],
+                        ele=end_place_location["ele"],
+                    ),
+                    points=[
+                        PointSchema(lat=p["lat"], lon=p["lon"], ele=p["ele"])
+                        for p in track_points
+                    ]
+                ))
+
+        return interval_schemas
+
+    def _get_start_and_end_place(
+            self,
+            session: Session,
+            interval: CourseInterval,
+            is_reversed: bool
+    ) -> Tuple[Place, Place]:
+        start_place_id = interval.place_a_id if not is_reversed else interval.place_b_id
+        end_place_id = interval.place_b_id if start_place_id == interval.place_a_id else interval.place_a_id
+
+        start_place = self._place_repository.get_place_by_instance(session, start_place_id)
+        if not start_place:
+            raise ValueError("Start Place Not Found")
+
+        end_place = self._place_repository.get_place_by_instance(session, end_place_id)
+        if not end_place:
+            raise ValueError("End Place Not Found")
+
+        return start_place, end_place
+
+    def _get_location_from_place(self, place: Place) -> Dict[str, Optional[float]]:
+        shape = to_shape(place.geom)
+
+        location = {
+            "lat": shape.y,
+            "lon": shape.x,
+            "ele": shape.z if shape.has_z else None
+        }
+
+        return location
+
+    def _get_points(self, interval: CourseInterval, is_reverse: bool) -> List[Dict[str, float]]:
+        shape = to_shape(interval.geom)
+
+        track_points: List[Dict[str, float]] = []
+        """ DB 상에서 해발고도(z)는 무조건 존재함을 보장하기 때문에 따로 분기처리할 필요가 없다.
+        if shape.has_z:
+            for lon, lat, ele in shape.coords:
+                track_points.append({"lat": lat, "lon": lon, "ele": ele})
+        """
+        for lon, lat, ele in shape.coords:
+            track_points.append({"lat": lat, "lon": lon, "ele": ele})
+
+        if is_reverse:
+            track_points.reverse()
+
+        return track_points
