@@ -41,7 +41,7 @@ def _setup_data(session: Session):
         difficulty=difficulty_lv2,
         place_a=place_b,
         place_b=place_c,
-        points=POINTS_B_TO_C_DATA
+        points=POINTS_B_TO_C_DATA,
     )
 
     course = CourseFactory.create(
@@ -58,3 +58,22 @@ def _setup_data(session: Session):
     CourseImageFactory.create(sort_order=2, course_id=course.id)
 
     session.commit()
+
+@pytest.mark.parametrize(
+    "params, error_code",
+    [
+        ({"course_id": 1}, 200),
+        ({"course_id": 2}, 404),
+    ]
+)
+def test_search_course_interval(client: TestClient, dbsession: Session, params: Dict, error_code: int):
+    _setup_data(dbsession)
+
+    # when
+    response: Response = client.get(f"/api/v1/courses/{params['course_id']}/intervals")
+
+    # then
+    assert response.status_code == error_code
+
+    if error_code == 200:
+        assert response.json()["intervalCount"] == 2
