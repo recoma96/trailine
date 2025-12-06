@@ -1,16 +1,18 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Sequence, List, Dict, Any
+from typing import Optional, Sequence, List
 
 from sqlalchemy import select, or_, func, cast, Integer, values, literal, literal_column
 from sqlalchemy.orm import Session, aliased
 
+from trailine_api.common.types import SQLRowList, SQLRow
 from trailine_model.models.place import Place
 from trailine_model.models.course import (
     Course,
     CourseCourseInterval,
     CourseInterval,
     CourseDifficulty,
-    CourseStyle
+    CourseStyle,
+    CourseImage,
 )
 
 
@@ -28,9 +30,16 @@ class ICourseRepository(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_course_list_information(self, session: Session, course_id_list: Sequence[int]) -> List[Dict[str, Any]]:
+    def get_course_list_information(self, session: Session, course_id_list: Sequence[int]) -> SQLRowList:
         """
         검색된 코스 아이디에 대해 리스트 조회에 필요한 정볼르 Dict형태로 가져오는 함수
+        """
+        pass
+
+    @abstractmethod
+    def get_course_detail(self, session: Session, course_id: int) -> Optional[SQLRow]:
+        """
+        코스 상세 정보
         """
         pass
 
@@ -87,8 +96,10 @@ class CourseRepository(ICourseRepository):
         course_id_list: Sequence[int] = session.scalars(stmt).all()
         return course_id_list
 
-
-    def get_course_list_information(self, session: Session, course_id_list: Sequence[int]) -> List[Dict[str, Any]]:
+    def _build_course_information_query(self):
+        """
+        코스 리스트와 상세 정보 조회에 사용되는 공통 쿼리를 생성하는 헬퍼 메서드
+        """
         place_a, place_b = aliased(Place), aliased(Place)
 
         # corss join literal ... land_address
@@ -128,13 +139,62 @@ class CourseRepository(ICourseRepository):
             .join(land_addr, literal(True))
             .join(road_addr, literal(True))
             .where(
-                Course.id.in_(course_id_list),
                 Course.is_published.is_(True),
                 land_addr.c.land_addrs.is_not(None),
                 road_addr.c.road_addrs.is_not(None)
             )
         )
+        return stmt
 
-        results: List[Dict[str, Any]] = [dict(row) for row in session.execute(stmt).mappings()]
-
+    def get_course_list_information(self, session: Session, course_id_list: Sequence[int]) -> SQLRowList:
+        base_stmt = self._build_course_information_query()
+        stmt = base_stmt.where(Course.id.in_(course_id_list))
+        results = [dict(row) for row in session.execute(stmt).mappings()]
         return results
+
+    def get_course_images(self, session: Session, course_id: int) -> Sequence[CourseImage]:
+        stmt = (
+            select(CourseImage)
+            .where(CourseImage.course_id == course_id)
+            .order_by(CourseImage.sort_order)
+        )
+        result = session.execute(stmt).scalars().all()
+        return result
+
+    def get_course_detail(self, session: Session, course_id: int) -> Optional[SQLRow]:
+        base_stmt = self._build_course_information_query().add_columns(
+            Course.description.label("description"),
+        )
+        stmt = (
+            base_stmt
+            .where(Course.id == course_id)
+        )
+
+        rows = session.execute(stmt).mappings().all()
+        if not rows:
+            return None
+
+        # Dict화
+        data: SQLRow = {
+            "id": rows[0]["id"],
+            "name": rows[0]["name"],
+            "description": rows[0]["description"],
+            "land_addresses": list({row["land_addresses"] for row in rows}),
+            "road_addresses": list({row["road_addresses"] for row in rows}),
+            "difficulty": {
+                "id": rows[0]["difficulty_id"],
+                "code": rows[0]["difficulty_code"],
+                "level": rows[0]["difficulty_level"],
+            },
+            "course_style": {
+                "id": rows[0]["course_style_id"],
+                "code": rows[0]["course_style_label"],
+                "name": rows[0]["course_style_name"],
+            },
+            "images": [
+                {"title": img.title, "description": img.description, "url": img.url}
+                for img in self.get_course_images(session, course_id)
+            ],
+        }
+
+        return data

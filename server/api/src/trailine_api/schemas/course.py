@@ -14,6 +14,12 @@ class CourseStyleSchema(BaseModel):
     name: str = Field(..., description="코스스타일 이름 (한글명)")
 
 
+class CourseImageSchema(BaseModel):
+    title: Optional[str] = Field(..., description="이미지 제목")
+    description: Optional[str] = Field(..., description="이미지 설명")
+    url: str = Field(..., description="이미지 URL")
+
+
 class CourseSearchSchema(BaseModel):
     id: int = Field(..., description="코스 식별자")
     name: str = Field(..., description="코스 난이도")
@@ -28,3 +34,14 @@ class CourseSearchResponseSchema(BaseModel):
     page_size: int = Field(..., alias="pageSize", description="페이지 크기 (검색 개수)")
     total: int = Field(..., description="전체 검색 개수")
     courses: List[CourseSearchSchema] = Field(..., description="검색된 코스")
+
+
+class CourseDetailSchema(BaseModel):
+    id: int = Field(..., description="코스 식별자")
+    name: str = Field(..., description="코스 난이도")
+    description: str = Field(..., description="코스 설명")
+    load_addresses: List[str] = Field(..., alias="loadAddresses", description="코스에 해당하는 모든 위치(Place)의 도로명 주소 (중복제외)")
+    road_addresses: List[str] = Field(..., alias="roadAddresses", description="코스에 해당하는 모든 위치(Place)의 지번 주소 (중복제외)")
+    difficulty: CourseDifficultySchema = Field(..., description="코스 난이도 정보")
+    course_style: CourseStyleSchema = Field(..., alias="courseStyle", description="코스 스타일")
+    images: List[CourseImageSchema] = Field(..., description="코스 이미지 리스트 (sort_order 오름차순으로 정렬)")

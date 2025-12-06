@@ -1,12 +1,12 @@
 from typing import List, Annotated, Optional
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Query
-from fastapi import status
+from fastapi import APIRouter, Query, Path
+from fastapi import status, HTTPException
 from fastapi.params import Depends
 
 from trailine_api.container import Container
-from trailine_api.schemas.course import CourseSearchResponseSchema
+from trailine_api.schemas.course import CourseSearchResponseSchema, CourseDetailSchema
 from trailine_api.services.course_services import ICourseServices
 
 
@@ -54,3 +54,20 @@ async def get_courses(
         total=len(courses),
         courses=courses,
     )
+
+
+@router.get(
+    "/{course_id}",
+    status_code=status.HTTP_200_OK,
+    summary="코스 상세정보 조회",
+    response_model=CourseDetailSchema,
+)
+@inject
+async def get_course_detail(
+    course_service: Annotated[ICourseServices, Depends(Provide[Container.course_services])],
+    course_id: int = Path(..., description="코스 고유 아이디"),
+):
+    course = course_service.get_course_detail(course_id)
+    if not course:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="코스를 찾을 수 없습니다.")
+    return course

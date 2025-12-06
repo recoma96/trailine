@@ -9,7 +9,7 @@ from trailine_model.models.course import (
     CourseDifficulty,
     CourseStyle,
     Course,
-    CourseCourseInterval
+    CourseCourseInterval, CourseImage
 )
 from trailine_model.models.place import Place
 
@@ -91,6 +91,17 @@ class CourseStyleFactory(BaseFactory):
     code = factory.LazyFunction(lambda: fake.user_name()[:16])
     name = factory.LazyFunction(lambda: fake.name()[:16])
     description = factory.Faker("sentence")
+
+
+class CourseImageFactory(BaseFactory):
+    class Meta:
+        model = CourseImage
+
+    sort_order = factory.fuzzy.FuzzyInteger(1)
+    url = factory.Faker("image_url")
+    title = factory.Faker("name")
+    description = factory.Faker("sentence")
+    course_id = factory.LazyFunction(lambda cid: cid)
 
 
 class CourseFactory(BaseFactory):

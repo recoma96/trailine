@@ -56,7 +56,6 @@ def run_migrations_offline() -> None:
 
 
 def include_name(name, type_: str, parent_names: dict) -> bool:
-    print(name, type_, parent_names)
     # topology 관련 스키마 삭제 방지
     if type_ == "schema" and name == "topology":
         return False

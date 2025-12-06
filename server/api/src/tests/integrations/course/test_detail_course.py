@@ -18,6 +18,7 @@ from tests.factories import (
     CourseFactory,
     CourseDifficultyFactory,
     CourseStyleFactory,
+    CourseImageFactory,
 )
 
 
@@ -43,7 +44,7 @@ def _setup_data(session: Session):
         points=POINTS_B_TO_C_DATA
     )
 
-    CourseFactory.create(
+    course = CourseFactory.create(
         name="관악산 일부 코스",
         course_difficulty=CourseDifficultyFactory.create(),
         course_style=CourseStyleFactory.create(),
@@ -52,42 +53,31 @@ def _setup_data(session: Session):
             {"interval": interval_b_to_c, "position": 2}
         ]
     )
+
+
+    CourseImageFactory.create(sort_order=1, course_id=course.id)
+    CourseImageFactory.create(sort_order=2, course_id=course.id)
+
     session.commit()
 
 
 @pytest.mark.parametrize(
-    "params, expected_count",
+    "params, error_code",
     [
-        ({}, 1),
-        ({"difficulty": [1]}, 1),   # 생성된 코스 난이도 중 ID가 1인 코스 데이터는 한개다
-        ({"difficulty": [2]}, 0),   # 생성된 코스 난이도 중 ID가 1인 코스 데이터는 없다
-        ({"word": "관악"}, 1),       # 코스 연관검색 -> 관악으로 검색이 되어야 한다
-        ({"word": "-1"}, 1),        # 주소 연관검색 -> 지번주소-1, 도로명주소-1이 있음로 검색이 되어야 한다
-        ({"word": "-3"}, 0),        # 주소 연관검색 -> 지번주소-3 인 데이터는 없다
-        ({"courseStyle": 1}, 1),    # 코스 스타일 검색 ID가 1인 코스 스타일이 포함된 데이터는 한개다
-        ({"courseStyle": 2}, 0),    # 코스 스타일 검색 ID가 2인 코스 스타일이 포함된 데이터는 없다
+        ({"course_id": 1}, 200),
+        ({"course_id": 2}, 404),
     ]
 )
-def test_search_course_list(
+def test_detail_course(
         client: TestClient,
         dbsession: Session,
         params: Dict,
-        expected_count: int,
+        error_code: int,
 ):
     _setup_data(dbsession)
 
     # when
-    response: Response = client.get("/api/v1/courses", params=params)
+    response: Response = client.get(f"/api/v1/courses/{params['course_id']}")
 
     # then
-    assert response.status_code == 200
-    output = response.json()
-
-    assert output["total"] == expected_count
-
-    if expected_count > 0:
-        assert "difficulty" in output["courses"][0]
-        assert "courseStyle" in output["courses"][0]
-
-        assert output["courses"][0]["loadAddress"] == ["경기도 과천시 특정도로명주소-1", "경기도 과천시 특정도로명주소-2"]
-        assert output["courses"][0]["roadAddress"] == ["경기도 과천시 특정지번주소-1", "경기도 과천시 특정지번주소-2"]
+    assert response.status_code == error_code

@@ -2,7 +2,12 @@ from abc import ABCMeta, abstractmethod
 from typing import Optional, List, cast
 
 from trailine_api.repositories.course_repositories import ICourseRepository
-from trailine_api.schemas.course import CourseSearchSchema, CourseDifficultySchema, CourseStyleSchema
+from trailine_api.schemas.course import (
+    CourseSearchSchema,
+    CourseDifficultySchema,
+    CourseStyleSchema,
+    CourseDetailSchema, CourseImageSchema
+)
 from trailine_model.base import SessionLocal
 
 
@@ -19,6 +24,10 @@ class ICourseServices(metaclass=ABCMeta):
             page: int,
             page_size: int
     ) -> List[CourseSearchSchema]:
+        pass
+
+    @abstractmethod
+    def get_course_detail(self, course_id: int) -> Optional[CourseDetailSchema]:
         pass
 
 
@@ -86,3 +95,26 @@ class CourseServices(ICourseServices):
                 item.road_addresses.sort()
 
         return [item for item in formatted_results if item is not None]
+
+    def get_course_detail(self, course_id: int) -> Optional[CourseDetailSchema]:
+        with (SessionLocal() as session, session.begin()):
+            raw_result = self._course_repository.get_course_detail(session, course_id)
+
+        if raw_result is None:
+            return None
+
+        course_detail = CourseDetailSchema(
+            id=raw_result["id"],
+            name=raw_result["name"],
+            description=raw_result["description"],
+            loadAddresses=raw_result["road_addresses"],
+            roadAddresses=raw_result["land_addresses"],
+            difficulty=CourseDifficultySchema(**raw_result["difficulty"]),
+            courseStyle=CourseStyleSchema(**raw_result["course_style"]),
+            images=[
+                CourseImageSchema(**image)
+                for image in raw_result["images"]
+            ]
+        )
+
+        return course_detail
