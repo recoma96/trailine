@@ -15,4 +15,4 @@
 |포지션|사용기술|
 |---|---|
 |Backend|Python3.13, FastAPI, PostgreSQL, SQLAlchemy, SQLAdmin|
-|Frontend(WEB)|Typescript, React|
+|Frontend(WEB)|Typescript, React, Astro, Tailwindcss|

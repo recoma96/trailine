@@ -1,0 +1,14 @@
+---
+import type { GetStaticPaths } from "astro";
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+
+export async function getStaticPaths() {
+    return [{params: {id: 1}}];
+}
+
+const { id } = Astro.params;
+---
+
+<DefaultLayout>
+    <h1>{id}번</h1>
+</DefaultLayout>
