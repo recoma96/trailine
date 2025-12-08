@@ -4,7 +4,10 @@ from typing import Optional, List, cast, Tuple, Dict
 from geoalchemy2.shape import to_shape
 from sqlalchemy.orm import Session
 
-from trailine_api.repositories.course_repositories import ICourseRepository
+from trailine_api.repositories.course_repositories import (
+    ICourseRepository,
+    ICourseDifficultyRepository
+)
 from trailine_api.repositories.place_repositories import IPlaceRepository
 from trailine_api.schemas.course import (
     CourseSearchSchema,
@@ -12,7 +15,9 @@ from trailine_api.schemas.course import (
     CourseStyleSchema,
     CourseDetailSchema,
     CourseImageSchema,
-    CourseIntervalSchema, CourseIntervalImageSchema, CourseIntervalDifficultySchema
+    CourseIntervalSchema,
+    CourseIntervalImageSchema,
+    CourseIntervalDifficultySchema
 )
 from trailine_api.schemas.place import PlaceSchema
 from trailine_api.schemas.point import PointSchema
@@ -23,15 +28,18 @@ from trailine_model.models.course import CourseInterval
 
 class ICourseService(metaclass=ABCMeta):
     _course_repository: ICourseRepository
+    _course_difficulty_repository: ICourseDifficultyRepository
     _place_repository: IPlaceRepository
 
     def __init__(
             self,
             course_repository: ICourseRepository,
-            place_repository: IPlaceRepository
+            place_repository: IPlaceRepository,
+            course_difficulty_repository: ICourseDifficultyRepository,
     ):
         self._course_repository = course_repository
         self._place_repository = place_repository
+        self._course_difficulty_repository = course_difficulty_repository
 
     @abstractmethod
     def get_courses(
@@ -52,6 +60,9 @@ class ICourseService(metaclass=ABCMeta):
     def get_course_intervals(self, course_id: int) -> Optional[List[CourseIntervalSchema]]:
         pass
 
+    @abstractmethod
+    def get_course_difficulty_list(self) -> List[CourseDifficultySchema]:
+        pass
 
 class CourseService(ICourseService):
     def get_courses(
@@ -95,6 +106,7 @@ class CourseService(ICourseService):
                         id=row["difficulty_id"],
                         level=row["difficulty_level"],
                         code=row["difficulty_code"],
+                        name=row["difficulty_name"],
                     ),
                     courseStyle=CourseStyleSchema(
                         id=row["course_style_id"],
@@ -245,3 +257,16 @@ class CourseService(ICourseService):
             track_points.reverse()
 
         return track_points
+
+    def get_course_difficulty_list(self) -> List[CourseDifficultySchema]:
+        with (SessionLocal() as session, session.begin()):
+            instances = self._course_difficulty_repository.get_course_difficulty_all(session)
+            return [
+                CourseDifficultySchema(
+                    id=instance.id,
+                    code=instance.code,
+                    name=instance.name,
+                    level=instance.level,
+                )
+                for instance in instances
+            ]

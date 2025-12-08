@@ -7,7 +7,7 @@ from fastapi.params import Depends
 
 from trailine_api.container import Container
 from trailine_api.schemas.course import CourseSearchResponseSchema, CourseDetailSchema, \
-    GettingCourseIntervalResponseSchema
+    GettingCourseIntervalResponseSchema, CourseDifficultySchema
 from trailine_api.services.course_services import ICourseService
 
 
@@ -55,6 +55,19 @@ async def get_courses(
         total=len(courses),
         courses=courses,
     )
+
+
+@router.get(
+    "/difficulties",
+    status_code=status.HTTP_200_OK,
+    summary="코스 난이도 리스트 조회",
+    response_model=List[CourseDifficultySchema],
+)
+@inject
+async def list_course_difficuity(
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+):
+    return course_service.get_course_difficulty_list()
 
 
 @router.get(

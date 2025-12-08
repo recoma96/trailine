@@ -1,7 +1,12 @@
-from dependency_injector import containers, providers
+from dependency_injector import containers
 from dependency_injector.providers import Factory
 
-from trailine_api.repositories.course_repositories import CourseRepository, ICourseRepository
+from trailine_api.repositories.course_repositories import (
+    CourseRepository,
+    ICourseRepository,
+    ICourseDifficultyRepository,
+    CourseDifficultyRepository
+)
 from trailine_api.repositories.place_repositories import IPlaceRepository, PlaceRepository
 from trailine_api.services.course_services import ICourseService, CourseService
 
@@ -13,13 +18,15 @@ class Container(containers.DeclarativeContainer):
         ]
     )
 
-    # 1. course_repository provider가 구체 클래스(CourseRepository)를 생성하도록 수정
+    # Repository
     course_repository: Factory[ICourseRepository] = Factory(CourseRepository)
+    course_difficulty_repository: Factory[ICourseDifficultyRepository] = Factory(CourseDifficultyRepository)
     place_repository: Factory[IPlaceRepository] = Factory(PlaceRepository)
 
-    # 2. course_services를 생성할 때, 위에서 정의한 course_repository를 주입하도록 설정
+    # Service
     course_services: Factory[ICourseService] = Factory(
         CourseService,
         course_repository=course_repository,
         place_repository=place_repository,
+        course_difficulty_repository=course_difficulty_repository,
     )
