@@ -8,6 +8,7 @@ from trailine_api.schemas.point import PointSchema
 class CourseDifficultySchema(BaseModel):
     id: int = Field(..., description="코스난이도 식별자")
     code: str = Field(..., description="난이도 고유코드(영문명)")
+    name: str = Field(..., description="난이도 이름(한글명)")
     level: int = Field(..., description="난이도 수치(또는 레벨)")
 
 

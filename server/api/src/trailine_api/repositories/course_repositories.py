@@ -16,6 +16,13 @@ from trailine_model.models.course import (
 )
 
 
+
+class ICourseDifficultyRepository(metaclass=ABCMeta):
+    @abstractmethod
+    def get_course_difficulty_all(self, session: Session) -> Sequence[CourseDifficulty]:
+        pass
+
+
 class ICourseRepository(metaclass=ABCMeta):
     @abstractmethod
     def get_course_ids_by_search(
@@ -46,6 +53,12 @@ class ICourseRepository(metaclass=ABCMeta):
     @abstractmethod
     def get_intervals(self, session: Session, course_id: int) -> Tuple[List[CourseInterval], List[bool]]:
         pass
+
+
+class CourseDifficultyRepository(ICourseDifficultyRepository):
+    def get_course_difficulty_all(self, session: Session) -> Sequence[CourseDifficulty]:
+        stmt = select(CourseDifficulty)
+        return session.execute(stmt).scalars().all()
 
 
 class CourseRepository(ICourseRepository):
@@ -128,6 +141,7 @@ class CourseRepository(ICourseRepository):
                 CourseDifficulty.id.label("difficulty_id"),
                 CourseDifficulty.level.label("difficulty_level"),
                 CourseDifficulty.code.label("difficulty_code"),
+                CourseDifficulty.name.label("difficulty_name"),
                 CourseStyle.id.label("course_style_id"),
                 CourseStyle.code.label("course_style_label"),
                 CourseStyle.name.label("course_style_name"),
@@ -189,6 +203,7 @@ class CourseRepository(ICourseRepository):
                 "id": rows[0]["difficulty_id"],
                 "code": rows[0]["difficulty_code"],
                 "level": rows[0]["difficulty_level"],
+                "name": rows[0]["difficulty_name"],
             },
             "course_style": {
                 "id": rows[0]["course_style_id"],
