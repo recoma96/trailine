@@ -6,8 +6,13 @@ from fastapi import status, HTTPException
 from fastapi.params import Depends
 
 from trailine_api.container import Container
-from trailine_api.schemas.course import CourseSearchResponseSchema, CourseDetailSchema, \
-    GettingCourseIntervalResponseSchema, CourseDifficultySchema
+from trailine_api.schemas.course import (
+    CourseSearchResponseSchema,
+    CourseDetailSchema,
+    GettingCourseIntervalResponseSchema,
+    CourseDifficultySchema,
+    CourseStyleSchema
+)
 from trailine_api.services.course_services import ICourseService
 
 
@@ -68,6 +73,19 @@ async def list_course_difficuity(
     course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
 ):
     return course_service.get_course_difficulty_list()
+
+
+@router.get(
+    "/styles",
+    status_code=status.HTTP_200_OK,
+    summary="코스 스타일 리스트 조회",
+    response_model=List[CourseStyleSchema],
+)
+@inject
+async def list_course_style(
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+):
+    return course_service.get_course_style_list()
 
 
 @router.get(

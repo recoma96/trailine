@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from trailine_api.repositories.course_repositories import (
     ICourseRepository,
-    ICourseDifficultyRepository
+    ICourseDifficultyRepository,
+    ICourseStyleRepository
 )
 from trailine_api.repositories.place_repositories import IPlaceRepository
 from trailine_api.schemas.course import (
@@ -29,6 +30,7 @@ from trailine_model.models.course import CourseInterval
 class ICourseService(metaclass=ABCMeta):
     _course_repository: ICourseRepository
     _course_difficulty_repository: ICourseDifficultyRepository
+    _course_style_repository: ICourseStyleRepository
     _place_repository: IPlaceRepository
 
     def __init__(
@@ -36,10 +38,12 @@ class ICourseService(metaclass=ABCMeta):
             course_repository: ICourseRepository,
             place_repository: IPlaceRepository,
             course_difficulty_repository: ICourseDifficultyRepository,
+            course_style_repository: ICourseStyleRepository
     ):
         self._course_repository = course_repository
         self._place_repository = place_repository
         self._course_difficulty_repository = course_difficulty_repository
+        self._course_style_repository = course_style_repository
 
     @abstractmethod
     def get_courses(
@@ -63,6 +67,11 @@ class ICourseService(metaclass=ABCMeta):
     @abstractmethod
     def get_course_difficulty_list(self) -> List[CourseDifficultySchema]:
         pass
+
+    @abstractmethod
+    def get_course_style_list(self) -> List[CourseStyleSchema]:
+        pass
+
 
 class CourseService(ICourseService):
     def get_courses(
@@ -267,6 +276,18 @@ class CourseService(ICourseService):
                     code=instance.code,
                     name=instance.name,
                     level=instance.level,
+                )
+                for instance in instances
+            ]
+
+    def get_course_style_list(self) -> List[CourseStyleSchema]:
+        with (SessionLocal() as session, session.begin()):
+            instances = self._course_style_repository.get_course_style_all(session)
+            return [
+                CourseStyleSchema(
+                    id=instance.id,
+                    code=instance.code,
+                    name=instance.name,
                 )
                 for instance in instances
             ]
