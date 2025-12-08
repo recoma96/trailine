@@ -27,7 +27,7 @@ class Container(containers.DeclarativeContainer):
     place_repository: Factory[IPlaceRepository] = Factory(PlaceRepository)
 
     # Service
-    course_services: Factory[ICourseService] = Factory(
+    course_service: Factory[ICourseService] = Factory(
         CourseService,
         course_repository=course_repository,
         place_repository=place_repository,

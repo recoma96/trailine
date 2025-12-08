@@ -27,7 +27,7 @@ router = APIRouter()
 )
 @inject
 async def get_courses(
-    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
     word: Optional[str] = Query(
         None,
         min_length=1,
@@ -70,7 +70,7 @@ async def get_courses(
 )
 @inject
 async def list_course_difficuity(
-    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
 ):
     return course_service.get_course_difficulty_list()
 
@@ -83,7 +83,7 @@ async def list_course_difficuity(
 )
 @inject
 async def list_course_style(
-    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
 ):
     return course_service.get_course_style_list()
 
@@ -96,7 +96,7 @@ async def list_course_style(
 )
 @inject
 async def get_course_detail(
-    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
     course_id: int = Path(..., description="코스 고유 아이디"),
 ):
     course = course_service.get_course_detail(course_id)
@@ -113,7 +113,7 @@ async def get_course_detail(
 )
 @inject
 async def get_course_intervals(
-    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
     course_id: int = Path(..., description="코스 고유 아이디"),
 ):
     intervals = course_service.get_course_intervals(course_id)
