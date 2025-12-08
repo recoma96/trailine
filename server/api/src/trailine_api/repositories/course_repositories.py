@@ -23,6 +23,12 @@ class ICourseDifficultyRepository(metaclass=ABCMeta):
         pass
 
 
+class ICourseStyleRepository(metaclass=ABCMeta):
+    @abstractmethod
+    def get_course_style_all(self, session: Session) -> Sequence[CourseStyle]:
+        pass
+
+
 class ICourseRepository(metaclass=ABCMeta):
     @abstractmethod
     def get_course_ids_by_search(
@@ -58,6 +64,12 @@ class ICourseRepository(metaclass=ABCMeta):
 class CourseDifficultyRepository(ICourseDifficultyRepository):
     def get_course_difficulty_all(self, session: Session) -> Sequence[CourseDifficulty]:
         stmt = select(CourseDifficulty)
+        return session.execute(stmt).scalars().all()
+
+
+class CourseStyleRepository(ICourseStyleRepository):
+    def get_course_style_all(self, session: Session) -> Sequence[CourseStyle]:
+        stmt = select(CourseStyle)
         return session.execute(stmt).scalars().all()
 
 

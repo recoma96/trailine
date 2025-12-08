@@ -6,8 +6,13 @@ from fastapi import status, HTTPException
 from fastapi.params import Depends
 
 from trailine_api.container import Container
-from trailine_api.schemas.course import CourseSearchResponseSchema, CourseDetailSchema, \
-    GettingCourseIntervalResponseSchema, CourseDifficultySchema
+from trailine_api.schemas.course import (
+    CourseSearchResponseSchema,
+    CourseDetailSchema,
+    GettingCourseIntervalResponseSchema,
+    CourseDifficultySchema,
+    CourseStyleSchema
+)
 from trailine_api.services.course_services import ICourseService
 
 
@@ -22,7 +27,7 @@ router = APIRouter()
 )
 @inject
 async def get_courses(
-    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
     word: Optional[str] = Query(
         None,
         min_length=1,
@@ -65,9 +70,22 @@ async def get_courses(
 )
 @inject
 async def list_course_difficuity(
-    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
 ):
     return course_service.get_course_difficulty_list()
+
+
+@router.get(
+    "/styles",
+    status_code=status.HTTP_200_OK,
+    summary="코스 스타일 리스트 조회",
+    response_model=List[CourseStyleSchema],
+)
+@inject
+async def list_course_style(
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
+):
+    return course_service.get_course_style_list()
 
 
 @router.get(
@@ -78,7 +96,7 @@ async def list_course_difficuity(
 )
 @inject
 async def get_course_detail(
-    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
     course_id: int = Path(..., description="코스 고유 아이디"),
 ):
     course = course_service.get_course_detail(course_id)
@@ -95,7 +113,7 @@ async def get_course_detail(
 )
 @inject
 async def get_course_intervals(
-    course_service: Annotated[ICourseService, Depends(Provide[Container.course_services])],
+    course_service: Annotated[ICourseService, Depends(Provide[Container.course_service])],
     course_id: int = Path(..., description="코스 고유 아이디"),
 ):
     intervals = course_service.get_course_intervals(course_id)
