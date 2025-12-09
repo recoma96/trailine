@@ -8,9 +8,17 @@ import "@/styles/global.css"
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+
+		<!-- Gothic A1 -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Gothic+A1&display=swap" rel="stylesheet">
+		
+		<title>Trailine</title>
 	</head>
 	<body>
-        <slot />
+		<div class="px-10 lg:px-[200px]">
+            <slot />
+		</div>
 	</body>
 </html>

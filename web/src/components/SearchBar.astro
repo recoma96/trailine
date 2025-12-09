@@ -1,0 +1,68 @@
+---
+---
+
+<div class="w-full max-w-full lg:w-[700px] flex flex-col items-center p-4">
+    <div class="flex space-x-4 mb-4">
+        <!-- Difficulty Dropdown -->
+        <div class="dropdown">
+            <div tabindex="0" role="button" class="btn m-1" data-default-text="난이도">난이도</div>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <li><a data-code="ALL">전체</a></li>
+                <li><a data-code="EASY">쉬움</a></li>
+                <li><a data-code="NORMAL">보통</a></li>
+                <li><a data-code="HARD">어려움</a></li>
+            </ul>
+        </div>
+
+        <!-- Course Style Dropdown -->
+        <div class="dropdown">
+            <div tabindex="0" role="button" class="btn m-1" data-default-text="코스 스타일">코스 스타일</div>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <li><a data-code="ALL">전체</a></li>
+                <li><a data-code="HIKING">하이킹</a></li>
+                <li><a data-code="TREKKING">트레킹</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Search Input and Button -->
+    <div class="form-control w-full">
+        <div class="input-group flex">
+            <input type="text" placeholder="검색하고 싶은 코스를 입력하세요..." class="input input-bordered w-full" />
+            <button class="btn btn-square">
+                <!-- Explorer icon or text -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <!-- Alternatively, if icon not found: 검색 -->
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.dropdown').forEach(dropdown => {
+        const button = dropdown.querySelector('.btn');
+        const defaultText = button?.dataset.defaultText || ''; // Get default text from data attribute
+        const menuItems = dropdown.querySelectorAll('.dropdown-content li a');
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', (event) => {
+                event.preventDefault();
+                const itemCode = item.dataset.code;
+
+                if (button) {
+                    if (itemCode === 'ALL' && defaultText) {
+                        button.textContent = defaultText;
+                    } else if (item.textContent) {
+                        button.textContent = item.textContent;
+                    }
+                }
+                
+                // Close dropdown after selection by removing focus
+                const activeElement = document.activeElement as HTMLElement;
+                if (activeElement) {
+                    activeElement.blur();
+                }
+            });
+        });
+    });
+</script>
