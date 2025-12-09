@@ -66,7 +66,7 @@ const CourseSearchList: React.FC = () => {
     }, []);
 
     return (
-        <div className="mt-5 overflow-xauto rounded-box border border-base-content/5 bg-base-100 w-[700px]">
+        <div className="mt-5 overflow-xauto rounded-box border border-base-content/5 bg-base-100 w-full lg:w-[700px]">
             <table className="table">
                 <thead>
                     <tr>
@@ -81,7 +81,7 @@ const CourseSearchList: React.FC = () => {
                     {courses.map((course, index) => (
                         <tr key={course.id}>
                             <th>{index + 1}</th>
-                            <td>{course.name}</td>
+                            <td><a href={`/courses/${course.id}`} className="hover:underline">{course.name}</a></td>
                             <td>
                                 {course.roadAddresses.length > 0 ? (
                                     course.roadAddresses[0]
