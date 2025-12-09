@@ -98,7 +98,7 @@ const SearchBar: React.FC = () => {
                         {difficulties.map(difficulty => (
                             <li key={difficulty.id}>
                                 <a onClick={() => handleDropdownSelect('difficulty', String(difficulty.id))}>
-                                    {difficulty.name}
+                                    [Lv.{difficulty.level}] {difficulty.name}
                                 </a>
                             </li>
                         ))}
