@@ -2,14 +2,14 @@
 export const prerender = false; // SSR 동작을 위해 false로 설정
 
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
-import SearchBar from "@/components/SearchBar.astro";
+import SearchBar from "@/components/client/SearchBar";
+import CourseSearchList from "@/components/client/CourseSearchList";
 ---
 
 <DefaultLayout>
 	<div class="pt-12">
 		<h1 class="text-center">Trailine</h1>
-		<div class="flex justify-center">
-			<SearchBar />
-		</div>
+		<div class="flex justify-center"><SearchBar client:load /></div>
+		<div class="flex justify-center"><CourseSearchList client:load /></div>
 	</div>
 </DefaultLayout>
