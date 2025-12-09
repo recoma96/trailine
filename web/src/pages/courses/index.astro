@@ -1,13 +1,15 @@
 ---
+export const prerender = false; // SSR 동작을 위해 false로 설정
+
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import SearchBar from "@/components/SearchBar.astro";
-
-const word = Astro.url.searchParams.get("word");
 ---
 
 <DefaultLayout>
 	<div class="pt-12">
 		<h1 class="text-center">Trailine</h1>
-		<SearchBar />
+		<div class="flex justify-center">
+			<SearchBar />
+		</div>
 	</div>
 </DefaultLayout>
