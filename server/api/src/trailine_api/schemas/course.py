@@ -27,8 +27,8 @@ class CourseImageSchema(BaseModel):
 class CourseSearchSchema(BaseModel):
     id: int = Field(..., description="코스 식별자")
     name: str = Field(..., description="코스 난이도")
-    load_addresses: List[str] = Field(..., alias="loadAddress", description="코스에 해당하는 모든 위치(Place)의 도로명 주소 (중복제외)")
-    road_addresses: List[str] = Field(..., alias="roadAddress", description="코스에 해당하는 모든 위치(Place)의 지번 주소 (중복제외)")
+    load_addresses: List[str] = Field(..., alias="loadAddresses", description="코스에 해당하는 모든 위치(Place)의 도로명 주소 (중복제외)")
+    road_addresses: List[str] = Field(..., alias="roadAddresses", description="코스에 해당하는 모든 위치(Place)의 지번 주소 (중복제외)")
     difficulty: CourseDifficultySchema = Field(..., description="코스 난이도 정보")
     course_style: CourseStyleSchema = Field(..., alias="courseStyle", description="코스 스타일")
 

@@ -109,8 +109,8 @@ class CourseService(ICourseService):
                 formatted_results[idx] = CourseSearchSchema(
                     id=row["id"],
                     name=row["name"],
-                    loadAddress=[row["road_addresses"]],
-                    roadAddress=[row["land_addresses"]],
+                    loadAddresses=[row["road_addresses"]],
+                    roadAddresses=[row["land_addresses"]],
                     difficulty=CourseDifficultySchema(
                         id=row["difficulty_id"],
                         level=row["difficulty_level"],
