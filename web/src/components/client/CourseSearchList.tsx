@@ -1,4 +1,4 @@
-import { getPaginationItems } from "@/utils";
+import { getPaginationItems } from "@/lib/pagination";
 import { useEffect, useState } from "react";
 
 type DifficultySchema = {
