@@ -1,9 +1,15 @@
 ---
-import DefaultLayout from "@/layouts/DefaultLayout.astro";
+export const prerender = false; // SSR 동작을 위해 false로 설정
 
-const word = Astro.url.searchParams.get("word");
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+import SearchBar from "@/components/client/SearchBar";
+import CourseSearchList from "@/components/client/CourseSearchList";
 ---
 
 <DefaultLayout>
-	<h1>{word ? `Searching for: ${word}` : "Hello SearchPage"}</h1>
+	<div class="pt-12">
+		<h1 class="text-center">Trailine</h1>
+		<div class="flex justify-center"><SearchBar client:load /></div>
+		<div class="flex justify-center"><CourseSearchList client:load /></div>
+	</div>
 </DefaultLayout>

@@ -1,1 +1,11 @@
 @import "tailwindcss";
+@plugin "daisyui";
+
+
+body {
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+}
+
+h1 { @apply text-[44px] }

@@ -47,5 +47,5 @@ def test_search_course_list(
         assert "difficulty" in output["courses"][0]
         assert "courseStyle" in output["courses"][0]
 
-        assert output["courses"][0]["loadAddress"] == ["경기도 과천시 특정도로명주소-1", "경기도 과천시 특정도로명주소-2"]
-        assert output["courses"][0]["roadAddress"] == ["경기도 과천시 특정지번주소-1", "경기도 과천시 특정지번주소-2"]
+        assert output["courses"][0]["loadAddresses"] == ["경기도 과천시 특정도로명주소-1", "경기도 과천시 특정도로명주소-2"]
+        assert output["courses"][0]["roadAddresses"] == ["경기도 과천시 특정지번주소-1", "경기도 과천시 특정지번주소-2"]

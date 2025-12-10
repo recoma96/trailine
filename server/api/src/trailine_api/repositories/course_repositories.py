@@ -39,7 +39,7 @@ class ICourseRepository(metaclass=ABCMeta):
             course_styles: Optional[List[int]],
             page: int,
             page_size: int
-    ) -> Sequence[int]:
+    ) -> Tuple[int, Sequence[int]]:
         pass
 
     @abstractmethod
@@ -82,7 +82,7 @@ class CourseRepository(ICourseRepository):
             course_styles: Optional[List[int]],
             page: int,
             page_size: int
-    ) -> Sequence[int]:
+    ) -> Tuple[int, Sequence[int]]:
         # place_a, place_b를 조인하기 위해 별칭(alias)을 사용합니다.
         place_a, place_b = aliased(Place), aliased(Place)
 
@@ -118,12 +118,17 @@ class CourseRepository(ICourseRepository):
                 func.max(cast(Course.name.like(word_s), Integer)).desc(),
                 Course.id  # 2차 정렬
             )
-            .limit(page_size)
-            .offset((page - 1) * page_size)
         )
 
+        total_count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = session.execute(total_count_stmt).scalar()
+        if not total:
+            total = 0
+
+        stmt = stmt.limit(page_size).offset((page - 1) * page_size)
+
         course_id_list: Sequence[int] = session.scalars(stmt).all()
-        return course_id_list
+        return total, course_id_list
 
     def _build_course_information_query(self):
         """

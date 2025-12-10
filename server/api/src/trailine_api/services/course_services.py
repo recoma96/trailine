@@ -53,7 +53,7 @@ class ICourseService(metaclass=ABCMeta):
             course_styles: Optional[List[int]],
             page: int,
             page_size: int
-    ) -> List[CourseSearchSchema]:
+    ) -> Tuple[int, List[CourseSearchSchema]]:
         pass
 
     @abstractmethod
@@ -81,9 +81,9 @@ class CourseService(ICourseService):
             course_styles: Optional[List[int]],
             page: int,
             page_size: int
-    ) -> List[CourseSearchSchema]:
+    ) -> Tuple[int, List[CourseSearchSchema]]:
         with (SessionLocal() as session, session.begin()):
-            course_id_list = self._course_repository.get_course_ids_by_search(
+            total_count, course_id_list = self._course_repository.get_course_ids_by_search(
                 session, word, difficulties, course_styles, page, page_size
             )
             data_size = len(course_id_list)
@@ -109,8 +109,8 @@ class CourseService(ICourseService):
                 formatted_results[idx] = CourseSearchSchema(
                     id=row["id"],
                     name=row["name"],
-                    loadAddress=[row["road_addresses"]],
-                    roadAddress=[row["land_addresses"]],
+                    loadAddresses=[row["road_addresses"]],
+                    roadAddresses=[row["land_addresses"]],
                     difficulty=CourseDifficultySchema(
                         id=row["difficulty_id"],
                         level=row["difficulty_level"],
@@ -137,7 +137,7 @@ class CourseService(ICourseService):
                 item.load_addresses.sort()
                 item.road_addresses.sort()
 
-        return [item for item in formatted_results if item is not None]
+        return total_count, [item for item in formatted_results if item is not None]
 
     def get_course_detail(self, course_id: int) -> Optional[CourseDetailSchema]:
         with (SessionLocal() as session, session.begin()):
