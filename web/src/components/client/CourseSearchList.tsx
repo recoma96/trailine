@@ -1,5 +1,5 @@
+import { getPaginationItems } from "@/utils";
 import { useEffect, useState } from "react";
-
 
 type DifficultySchema = {
     id: number;
@@ -23,9 +23,17 @@ type CourseSchema = {
     roadAddresses: string[];
 };
 
+type CourseSearchResponseSchema = {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+    courses: CourseSchema[];
+}
+
 
 const CourseSearchList: React.FC = () => {
-    const [courses, setCourses] = useState<CourseSchema[]>([]);
+    const [searchResult, setSearchResult] = useState<CourseSearchResponseSchema | null>(null);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -55,9 +63,8 @@ const CourseSearchList: React.FC = () => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch courses');
                 }
-                const raw = await response.json();
-                const data: CourseSchema[] = raw.courses;
-                setCourses(data);
+                const jsonResponse: CourseSearchResponseSchema = await response.json();
+                setSearchResult(jsonResponse);
             } catch (error) {
                 console.error("Error fetching courses:", error);
             }
@@ -65,9 +72,22 @@ const CourseSearchList: React.FC = () => {
         fetchCourses();
     }, []);
 
+    const handlePageChange = (page: string) => {
+        if (page === "...") return;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set("page", page);
+        window.location.search = urlParams.toString();
+    }
+    
+    const courses = searchResult?.courses || [];
+    const currentPage = searchResult?.page || 1;
+    const totalPages = searchResult?.totalPages || 1;
+    const paginationItems = getPaginationItems(currentPage, totalPages);
+
     return (
-        <div className="mt-5 overflow-xauto rounded-box border border-base-content/5 bg-base-100 w-full lg:w-[700px]">
-            <table className="table">
+        <div className="mt-5 overflow-xauto rounded-box bg-base-100 w-full lg:w-[700px]">
+            <table className="table border border-base-content/5">
                 <thead>
                     <tr>
                         <th></th>
@@ -80,7 +100,7 @@ const CourseSearchList: React.FC = () => {
                 <tbody>
                     {courses.map((course, index) => (
                         <tr key={course.id}>
-                            <th>{index + 1}</th>
+                            <th>{((currentPage - 1) * (searchResult?.pageSize || 10)) + index + 1}</th>
                             <td><a href={`/courses/${course.id}`} className="hover:underline">{course.name}</a></td>
                             <td>
                                 {course.roadAddresses.length > 0 ? (
@@ -95,6 +115,21 @@ const CourseSearchList: React.FC = () => {
                     ))}
                 </tbody>
             </table>
+            
+            {/* Pagination */}
+            <div className="text-center mt-10">
+                <div className="join">
+                    {paginationItems.map((page, index) => (
+                        <button 
+                            key={index}
+                            className={`join-item btn ${page === '...' ? 'btn-disabled' : ''} ${page === currentPage.toString() ? 'btn-active' : ''}`}
+                            onClick={() => handlePageChange(page)}
+                        >
+                            {page}
+                        </button>
+                    ))}
+                </div>
+            </div>
         </div>
     )
 };
