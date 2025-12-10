@@ -37,6 +37,7 @@ class CourseSearchResponseSchema(BaseModel):
     page: int = Field(..., description="페이지 번호 (1번부터 시작)")
     page_size: int = Field(..., alias="pageSize", description="페이지 크기 (검색 개수)")
     total: int = Field(..., description="전체 검색 개수")
+    total_pages: int = Field(..., alias="totalPages", description="전체 페이지 개수")
     courses: List[CourseSearchSchema] = Field(..., description="검색된 코스")
 
 

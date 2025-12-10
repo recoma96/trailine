@@ -1,4 +1,5 @@
 from typing import List, Annotated, Optional
+import math
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Query, Path
@@ -47,7 +48,7 @@ async def get_courses(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100, alias="pageSize"),
 ):
-    courses = course_service.get_courses(
+    total_count, courses = course_service.get_courses(
         word,
         difficulty,
         course_style,
@@ -57,7 +58,8 @@ async def get_courses(
     return CourseSearchResponseSchema(
         page=page,
         pageSize=page_size,
-        total=len(courses),
+        total=total_count,
+        totalPages=math.ceil(total_count / page_size),
         courses=courses,
     )
 
