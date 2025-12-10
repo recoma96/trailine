@@ -122,6 +122,8 @@ class CourseRepository(ICourseRepository):
 
         total_count_stmt = select(func.count()).select_from(stmt.subquery())
         total = session.execute(total_count_stmt).scalar()
+        if not total:
+            total = 0
 
         stmt = stmt.limit(page_size).offset((page - 1) * page_size)
 
