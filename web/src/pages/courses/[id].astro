@@ -1,14 +1,110 @@
----
-import type { GetStaticPaths } from "astro";
-import DefaultLayout from "@/layouts/DefaultLayout.astro";
+--- 
+export const prerender = false; // 이 페이지는 빌드 시점에 미리 렌더링되지 않습니다. (SSR)
 
-export async function getStaticPaths() {
-    return [{params: {id: 1}}];
-}
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+import ImageSlider from "@/components/client/ImageSlider";
 
 const { id } = Astro.params;
----
+
+
+// Response Types
+
+type Difficulty = {
+    id: number;
+    name: string;
+    code: string;
+    level: number;
+};
+
+type Style = {
+    id: number;
+    code: string;
+    name: string;
+};
+
+type Image = {
+    title: string;
+    description: string | null;
+    url: string;
+};
+
+
+type Course = {
+    id: number;
+    name: string;
+    description: string | null;
+    loadAddresses: string[];
+    roadAddresses: string[];
+    difficulty: Difficulty;
+    styles: Style;
+    images: Image[];
+};
+
+
+let isNotFound = false;
+
+const course: Course | null = await fetch(`${import.meta.env.API_ENDPOINT}/v1/courses/${id}`).then(async (res) => {
+    if (res.ok) {
+        return res.json() as Promise<Course>;
+    } else {
+        if (res.status === 404) {
+            isNotFound = true;
+            Astro.response.status = 404; // Set 404 status for the page
+            return null;
+        }
+        console.error(`Failed to fetch course: ${res.status} ${res.statusText}`);
+        return null;
+    }
+}).catch((err) => {
+    console.error("Fetch error:", err);
+    return null;
+});
+
+let mainAddress;
+if (course?.roadAddresses) {
+    mainAddress = course.roadAddresses[0];
+} else if (course?.loadAddresses) {
+    mainAddress = course?.loadAddresses[0];
+} else {
+    mainAddress = "주소 알 수 없음"
+}
+--- 
 
 <DefaultLayout>
-    <h1>{id}번</h1>
+    <!-- 상단 소개 부분 -->
+    <div class="text-center mb-6">
+        <h2>{course?.name}</h2>
+        <p>{mainAddress}</p>
+
+        <!-- 난이도뱃지 -->
+        <div class="flex justify-center mt-4">
+            <div class="badge badge-lg bg-black text-white rounded-none py-4 w-[180px] font-bold text-left">
+                Lv.{course?.difficulty?.level} | {course?.difficulty?.code}
+            </div>
+        </div>
+        <p>{course?.difficulty?.name}</p>
+    </div>
+
+    {course?.images && course.images.length > 0 && (
+        <ImageSlider client:load images={course.images} />
+    )}
+
+    <p class="my-10 p-5 border text-left">{course?.description}</p>
+
+
+    <!-- 데이터를 못찾았을 경우 -->
+    {isNotFound && (
+        <script>
+            alert("코스를 찾을 수 없습니다."); // "Course not found!" in Korean
+            window.location.href = "/courses";
+        </script>
+    )}
+
+    <!-- 기타 알수없는 에러 발생 시 -->
+    {!isNotFound && (course === null) && (
+        <script>
+            alert("알 수 없는 에러가 발생했어요."); // "Course not found!" in Korean
+            window.location.href = "/courses";
+        </script>
+    )}
 </DefaultLayout>
