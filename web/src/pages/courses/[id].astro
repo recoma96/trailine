@@ -3,49 +3,17 @@ export const prerender = false; // 이 페이지는 빌드 시점에 미리 렌�
 
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import ImageSlider from "@/components/client/ImageSlider";
+import type { CourseDetailSchemaResponse } from "@/response-types/course-detail";
+
 
 const { id } = Astro.params;
 
 
-// Response Types
-
-type Difficulty = {
-    id: number;
-    name: string;
-    code: string;
-    level: number;
-};
-
-type Style = {
-    id: number;
-    code: string;
-    name: string;
-};
-
-type Image = {
-    title: string;
-    description: string | null;
-    url: string;
-};
-
-
-type Course = {
-    id: number;
-    name: string;
-    description: string | null;
-    loadAddresses: string[];
-    roadAddresses: string[];
-    difficulty: Difficulty;
-    styles: Style;
-    images: Image[];
-};
-
-
 let isNotFound = false;
 
-const course: Course | null = await fetch(`${import.meta.env.API_ENDPOINT}/v1/courses/${id}`).then(async (res) => {
+const course: CourseDetailSchemaResponse | null = await fetch(`${import.meta.env.API_ENDPOINT}/v1/courses/${id}`).then(async (res) => {
     if (res.ok) {
-        return res.json() as Promise<Course>;
+        return res.json() as Promise<CourseDetailSchemaResponse>;
     } else {
         if (res.status === 404) {
             isNotFound = true;

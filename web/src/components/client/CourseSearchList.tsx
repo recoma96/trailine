@@ -1,36 +1,6 @@
 import { getPaginationItems } from "@/lib/pagination";
 import { useEffect, useState } from "react";
-
-type DifficultySchema = {
-    id: number;
-    code: string;
-    name: string;
-    level: number;
-};
-
-type StyleSchema = {
-    id: number;
-    code: string;
-    name: string;
-};
-
-type CourseSchema = {
-    courseStyle: StyleSchema;
-    difficulty: DifficultySchema;
-    id: number;
-    name: string;
-    loadAddresses: string[];
-    roadAddresses: string[];
-};
-
-type CourseSearchResponseSchema = {
-    page: number;
-    pageSize: number;
-    total: number;
-    totalPages: number;
-    courses: CourseSchema[];
-}
-
+import type { CourseSearchResponseSchema } from "@/response-types/course-list";
 
 const CourseSearchList: React.FC = () => {
     const [searchResult, setSearchResult] = useState<CourseSearchResponseSchema | null>(null);
