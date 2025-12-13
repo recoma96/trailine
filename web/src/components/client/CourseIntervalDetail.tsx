@@ -42,8 +42,6 @@ const CourseIntervalDetail: React.FC<Props> = ({courseId} : Props) => {
     if (loading) return <div><h1>로딩중</h1></div>
     if (intervals.length === 0) return <div><h1>데이터가 없습니다.</h1></div>
 
-    console.log(intervals);
-
     return (
         <div>
             <CourseMap intervalCount={intervalCount} intervals={intervals} />
