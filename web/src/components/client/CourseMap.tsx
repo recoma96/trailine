@@ -2,6 +2,8 @@ import type { Interval, CourseIntervalResponseSchema } from "@/types/responses/c
 import type { IntervalPoint } from "@/types/common/location";
 import React, { useRef, useEffect, useState } from "react";
 import { calculateMediumPoint } from "@/lib/calculator";
+import { createMarkerHtml } from "@/lib/map-marker";
+import { INTERVAL_DIFFICULTY_COLORS } from "@/vars/colors";
 
 
 interface Props {
@@ -22,6 +24,26 @@ const CourseMap: React.FC<Props> = ({intervalCount, intervals} : Props) => {
             const map = new naver.maps.Map(mapRef.current, {
                 center: new naver.maps.LatLng(centerPoint.lat, centerPoint.lon),
                 zoom: 15,
+            });
+
+            intervals.forEach((interval, idx) => {
+                const path = interval.points.map((point) => new naver.maps.LatLng(point.lat, point.lon));
+                new naver.maps.Polyline({
+                    map: map,
+                    path: path,
+                    strokeWeight: 4,
+                    strokeColor: INTERVAL_DIFFICULTY_COLORS[interval.difficulty.level],
+                });
+                const firstPoint = path[0];
+
+                const marker = new naver.maps.Marker({
+                    position: firstPoint,
+                    map: map,
+                    icon: {
+                        content: createMarkerHtml(idx + 1, interval.difficulty.level),
+                        anchor: new naver.maps.Point(15, 15),
+                    }
+                });
             });
         }
     }, []);
