@@ -14,6 +14,7 @@
     "@astrojs/node": "^9.5.1",
     "@astrojs/react": "^4.4.2",
     "@tailwindcss/vite": "^4.1.17",
+    "@types/navermaps": "^3.9.1",
     "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

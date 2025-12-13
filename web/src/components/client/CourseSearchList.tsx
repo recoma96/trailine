@@ -1,6 +1,6 @@
 import { getPaginationItems } from "@/lib/pagination";
 import { useEffect, useState } from "react";
-import type { CourseSearchResponseSchema } from "@/response-types/course-list";
+import type { CourseSearchResponseSchema } from "@/types/responses/course-list";
 
 const CourseSearchList: React.FC = () => {
     const [searchResult, setSearchResult] = useState<CourseSearchResponseSchema | null>(null);

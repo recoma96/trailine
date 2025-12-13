@@ -4,6 +4,7 @@ export const prerender = false; // 이 페이지는 빌드 시점에 미리 렌�
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import ImageSlider from "@/components/client/ImageSlider";
 import type { CourseDetailSchemaResponse } from "@/response-types/course-detail";
+import CourseIntervalDetail from "@/components/client/CourseIntervalDetail";
 
 
 const { id } = Astro.params;
@@ -36,9 +37,15 @@ if (course?.roadAddresses) {
 } else {
     mainAddress = "주소 알 수 없음"
 }
+
+const NaverMapsAPIClient = import.meta.env.NAVER_MAPS_API_CLIENT;
 --- 
 
 <DefaultLayout>
+    <!-- Naver Maps API Script -->
+    <script type="text/javascript" src=`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NaverMapsAPIClient}`></script>
+
+
     <!-- 상단 소개 부분 -->
     <div class="text-center mb-6">
         <h2>{course?.name}</h2>
@@ -58,6 +65,8 @@ if (course?.roadAddresses) {
     )}
 
     <p class="my-10 p-5 border text-left">{course?.description}</p>
+
+    <CourseIntervalDetail courseId={course?.id} client:load />
 
 
     <!-- 데이터를 못찾았을 경우 -->

@@ -17,7 +17,6 @@ interface Image {
     url: string;
 };
 
-
 export interface CourseDetailSchemaResponse {
     id: number;
     name: string;
