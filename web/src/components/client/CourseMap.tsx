@@ -9,10 +9,11 @@ import { INTERVAL_DIFFICULTY_COLORS } from "@/vars/colors";
 interface Props {
     intervalCount: number;
     intervals: Interval[];
+    className: string;
 };
 
 
-const CourseMap: React.FC<Props> = ({intervalCount, intervals} : Props) => {
+const CourseMap: React.FC<Props> = ({intervalCount, intervals, className} : Props) => {
     const mapRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -51,7 +52,7 @@ const CourseMap: React.FC<Props> = ({intervalCount, intervals} : Props) => {
 
     return (
         <div>
-            {mapRef && <div ref={mapRef} className="w-full h-[600px]" />}
+            {mapRef && <div ref={mapRef} className={`${className}`} />}
             {/* mapRef의 초기 데이터가 null임에도 useEffect가 작동되는 이유는, div태그에 ref으로 연결을 했기 때문이다. */}
         </div>
     )

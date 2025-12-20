@@ -1,6 +1,9 @@
 import type { Interval, CourseIntervalResponseSchema } from "@/types/responses/course-interval";
 import React, { useEffect, useState } from "react";
 import CourseMap from "./CourseMap";
+import CheckIcon from "@/components/client/CheckIcon";
+import { INTERVAL_DIFFICULTY_COLORS } from "@/vars/colors";
+import ImageSlider from "@/components/client/ImageSlider";
 
 
 interface Props {
@@ -43,8 +46,32 @@ const CourseIntervalDetail: React.FC<Props> = ({courseId} : Props) => {
     if (intervals.length === 0) return <div><h1>데이터가 없습니다.</h1></div>
 
     return (
-        <div>
-            <CourseMap intervalCount={intervalCount} intervals={intervals} />
+        <div className="lg:flex lg:gap-10 w-full">
+            <CourseMap intervalCount={intervalCount} intervals={intervals} className="h-[500px] lg:w-[600px] w-full" />
+            <ul className="mt-10 flex flex-col gap-y-3">
+                {intervals.map((interval, idx) => (
+                    <li>
+                        <div className="collapse bg-base-100 border-base-300 border">
+                            <input type="checkbox" />
+                            <div
+                                className="collapse-title font-semibold text-white lg:max-w-[900px] lg:w-auto w-full"
+                                style={{background: INTERVAL_DIFFICULTY_COLORS[interval.difficulty.level]}}>{
+                                    idx + 1}. {interval.name} [{interval.difficulty.name}]
+                            </div>
+                            <div className="collapse-content text-sm pt-5">
+                                {interval.images && interval.images.length > 0 && (
+                                    <ImageSlider images={interval.images.map((image) => ({
+                                        url: image.url,
+                                        title: image.title ?? "",
+                                        description: image.description
+                                    }))} className="max-w-full mx-auto mb-4" />
+                                )}
+                                <p>{interval.description}</p>
+                            </div>
+                        </div>
+                    </li>
+                ))}
+            </ul>
         </div>
         
     );

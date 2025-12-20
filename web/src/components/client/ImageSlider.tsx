@@ -18,11 +18,13 @@ type Image = {
 
 interface ImageSliderProps {
     images: Image[];
+    className?: string;
 }
 
-const ImageSlider: React.FC<ImageSliderProps> = ({ images }) => {
+const ImageSlider: React.FC<ImageSliderProps> = ({ images, className }) => {
+    if (className === undefined) className = "";
     return (
-        <div className="max-w-[800px] mx-auto">
+        <div className={`${className}`}>
             <Swiper
                 loop={true}
                 cssMode={true}

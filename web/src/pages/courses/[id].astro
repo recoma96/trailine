@@ -60,12 +60,15 @@ const NaverMapsAPIClient = import.meta.env.NAVER_MAPS_API_CLIENT;
         <p>{course?.difficulty?.name}</p>
     </div>
 
+    <!-- 코스 이미지 슬라이더 -->
     {course?.images && course.images.length > 0 && (
-        <ImageSlider client:load images={course.images} />
+        <ImageSlider client:load images={course.images} className="max-w-[800px] mx-auto" />
     )}
 
+    <!-- 코스 설명 글상자 -->
     <p class="my-10 p-5 border text-left">{course?.description}</p>
-
+    
+    <!-- 코스 구간 세부정보  -->
     <CourseIntervalDetail courseId={course?.id} client:load />
 
 
