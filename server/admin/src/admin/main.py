@@ -6,7 +6,7 @@ import json
 from fastapi import FastAPI, HTTPException
 from geoalchemy2 import WKTElement
 from geoalchemy2.shape import to_shape
-from sqladmin import Admin, ModelView
+from sqladmin import ModelView
 from sqladmin.fields import FileField
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
@@ -26,12 +26,13 @@ from trailine_model.models.course import (
 )
 from trailine_model.models.place import Place, PlaceImage
 from trailine_model.models.user import User
+from .base import PatchedAdmin
 
 from .config import config
 from .utils import upload_image_to_s3
 
 app = FastAPI()
-admin = Admin(app, engine)
+admin = PatchedAdmin(app, engine)
 
 
 class UserAdmin(ModelView, model=User):
@@ -143,6 +144,10 @@ class PlaceImageAdmin(ModelView, model=PlaceImage):
         self, data: dict, model: Any, is_created: bool, request: Request
     ) -> None:
         image: UploadFile = data.get("url")
+        if not image or not getattr(image, "filename", None):
+            data.pop("url", None)
+            return
+
         place_id = data.get("place")
         data["url"] = upload_image_to_s3(image, config.S3.BASE_PLACE_PATH, f"{place_id}/images")
 
@@ -311,6 +316,10 @@ class CourseImageAdmin(ModelView, model=CourseImage):
         self, data: dict, model: Any, is_created: bool, request: Request
     ) -> None:
         image: UploadFile = data.get("url")
+        if not image or not getattr(image, "filename", None):
+            data.pop("url", None)
+            return
+
         course_id = data.get("course")
         data["url"] = upload_image_to_s3(image, config.S3.BASE_COURSE_PATH, f"{course_id}/images")
 
@@ -338,9 +347,12 @@ class CourseIntervalImageAdmin(ModelView, model=CourseIntervalImage):
         self, data: dict, model: Any, is_created: bool, request: Request
     ) -> None:
         image: UploadFile = data.get("url")
+        if not image or not getattr(image, "filename", None):
+            data.pop("url", None)
+            return
+
         interval_id = data.get("course_interval")
         data["url"] = upload_image_to_s3(image, config.S3.BASE_COURSE_INTERVAL_PATH, f"{interval_id}/images")
-
 
 
 admin.add_view(UserAdmin)
