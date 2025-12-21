@@ -1,4 +1,4 @@
-import logging
+import os
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
@@ -13,16 +13,31 @@ def create_app() -> FastAPI:
 
     setup_logging(level="INFO")
 
-    app = FastAPI(title="trailine_api")
+    app = FastAPI(
+        title="trailine_api",
+        docs_url="/api/docs" if os.getenv("APP_ENV") != "prod" else None,
+        redoc_url="/api/redoc" if os.getenv("APP_ENV") != "prod" else None,
+        openapi_url="/api/openapi.json"  if os.getenv("APP_ENV") != "prod" else None,
+    )
     app.container = container  # type: ignore[attr-defined]
     app.add_middleware(RequestLoggingMiddleware)
 
     app.include_router(api_router, prefix="/api")
 
-    origins = [
-        "http://localhost:4321",
-        "http://127.0.0.1:4321",
-    ]
+    if os.getenv("APP_ENV") != "prod":
+        origins = [
+            # docker local test
+            "http://localhost",
+            "http://127.0.0.1",
+
+            # for devlopment in local
+            "http://localhost:4321",
+            "http://127.0.0.1:4321",
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+        ]
+    else:
+        origins = []
 
     app.add_middleware(
         CORSMiddleware,
