@@ -86,7 +86,7 @@ class CourseIntervalFactory(BaseFactory):
     difficulty = factory.SubFactory(CourseIntervalDifficultyFactory)
 
     # CourseInterval 생성 시 CourseImage 2개를 함께 생성합니다.
-    images = factory.List([factory.SubFactory(CourseIntervalImageFactory) for _ in range(2)])
+    images = factory.List([factory.SubFactory(CourseIntervalImageFactory, sort_order=i+1) for i in range(2)])
 
 
 class CourseDifficultyFactory(BaseFactory):
