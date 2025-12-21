@@ -1,10 +1,14 @@
 from logging.config import fileConfig
-from trailine_model.base import DATABASE_URL, Base
-from trailine_model.models.user import *
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
+
+from trailine_model.base import DATABASE_URL, Base
+from trailine_model.models.user import *
+from trailine_model.models.course import *
+from trailine_model.models.place import *
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -51,6 +55,23 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def include_name(name, type_: str, parent_names: dict) -> bool:
+    # topology 관련 스키마 삭제 방지
+    if type_ == "schema" and name == "topology":
+        return False
+
+    # public 스키마의 특정 테이블/뷰 배제
+    if type_ in ("table", "view"):
+        # PostGIS 관련 테이블 및 뷰 배제
+        if parent_names.get("schema_name") == "topology":
+            return False
+        if name in {"spatial_ref_sys", "geometry_columns", "geography_columns",
+                    "raster_columns", "raster_overviews", "topology", "layer"}:
+            return False
+
+    return True
+
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
@@ -67,7 +88,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            include_name=include_name,
         )
 
         with context.begin_transaction():

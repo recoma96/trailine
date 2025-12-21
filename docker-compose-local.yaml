@@ -1,0 +1,46 @@
+services:
+  trailine-api-server:
+    container_name: trailine-api-server
+    env_file:
+      - ./server/.local.env
+    build:
+      context: ./server
+      dockerfile: Dockerfile.local
+    expose:
+      - "8080"
+    networks:
+      - app_net
+
+  trailine-web-ssr:
+    container_name: trailine-web-ssr
+    build:
+      context: ./web
+      dockerfile: Dockerfile.local
+    env_file:
+      - ./web/.local.env
+    environment:
+      # 런타임에서도 필요하면 여기에 (SSR이면 런타임 env도 의미 있음)
+      PORT: "4321"
+      HOST: "0.0.0.0"
+    expose:
+      - "4321"
+    networks:
+      - app_net
+
+  trailine-nginx:
+    container_name: trailine-nginx
+    image: nginx:alpine
+    ports:
+      - "80:8080"
+    volumes:
+      - ./nginx/local.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - trailine-web-ssr
+      - trailine-api-server
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    external: true
+    name: ${DOCKER_NETWORK_NAME} # 기존에 있는 Network사용 -> RDB Docker Container 접속 목적

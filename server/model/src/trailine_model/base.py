@@ -1,7 +1,8 @@
+from datetime import datetime
 import os
 
-from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker, Mapped, mapped_column
+from sqlalchemy import create_engine, DateTime, text
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,3 +26,11 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 TIME_ZONE_QUERY = "now() AT TIME ZONE 'Asia/Seoul'"
+
+
+class TimeStampModel:
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False,
+                                                 server_default=text(f"({TIME_ZONE_QUERY})"))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False,
+                                                 server_default=text(f"({TIME_ZONE_QUERY})"),
+                                                 onupdate=text(f"({TIME_ZONE_QUERY})"))

@@ -1,0 +1,24 @@
+---
+import "@/styles/global.css"
+---
+
+<html lang="ko">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+
+		<!-- Gothic A1 -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Gothic+A1&display=swap" rel="stylesheet">
+		
+		<title>Trailine</title>
+	</head>
+	<body>
+		<div class="px-10 lg:px-[200px] py-12">
+            <slot />
+		</div>
+	</body>
+</html>
