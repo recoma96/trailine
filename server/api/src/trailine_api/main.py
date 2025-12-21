@@ -1,22 +1,28 @@
+import logging
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from trailine_api.common.logger import setup_logging
 from trailine_api.container import Container
+from trailine_api.middlewares.request_logger import RequestLoggingMiddleware
 from trailine_api.routers import router as api_router
 
 
 def create_app() -> FastAPI:
     container = Container()
 
+    setup_logging(level="INFO")
+
     app = FastAPI(title="trailine_api")
     app.container = container  # type: ignore[attr-defined]
+    app.add_middleware(RequestLoggingMiddleware)
+
     app.include_router(api_router, prefix="/api")
 
     origins = [
         "http://localhost:4321",
         "http://127.0.0.1:4321",
     ]
-
 
     app.add_middleware(
         CORSMiddleware,

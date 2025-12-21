@@ -149,7 +149,7 @@ class CourseCourseInterval(Base, TimeStampModel):
 class CourseImage(Base, TimeStampModel):
     __tablename__ = "course_image"
     __table_args__ = (
-        UniqueConstraint("course_id", "sort_order", name="course_image_unique"),
+        UniqueConstraint("course_id", "sort_order", name="course_image_unique_key"),
         {"comment": "코스 이미지 리스트"},
     )
 
@@ -167,7 +167,7 @@ class CourseImage(Base, TimeStampModel):
 class CourseIntervalImage(Base, TimeStampModel):
     __tablename__ = "course_interval_image"
     __table_args__ = (
-        UniqueConstraint("course_interval_id", "sort_order", name="course_interval_image_unique"),
+        UniqueConstraint("course_interval_id", "sort_order", name="course_interval_image_unique_key"),
         {"comment": "구간 이미지 리스트"}
     )
 
