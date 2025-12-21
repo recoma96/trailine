@@ -21,6 +21,7 @@ ENV APP_ENV=local \
     DB_PSWD= \
     DB_SCHEMA=
 
+ENV APP_ENV=local
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 

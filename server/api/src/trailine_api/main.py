@@ -1,4 +1,4 @@
-import uvicorn
+import os
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
@@ -19,10 +19,13 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router, prefix="/api")
 
-    origins = [
-        "http://localhost:4321",
-        "http://127.0.0.1:4321",
-    ]
+    if not os.getenv("APP_ENV") != "prod":
+        origins = [
+            "http://localhost:4321",
+            "http://127.0.0.1:4321",
+        ]
+    else:
+        origins = []
 
     app.add_middleware(
         CORSMiddleware,
