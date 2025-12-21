@@ -1,4 +1,5 @@
 import os
+from typing import Callable
 
 from uvicorn import run
 from dotenv import load_dotenv
@@ -52,7 +53,11 @@ def run_in_prod(): # Docker 사용 + Production
     )
 
 def main() -> None:
-    {
+    runners: dict[str, Callable[[], None]] = {
         "local": run_in_local,
         "prod": run_in_prod,
-    }.get(os.getenv("APP_ENV"), run_in_coding)()
+        "__default__": run_in_coding,
+    }
+
+    env = os.getenv("APP_ENV", "__default__")
+    runners.get(env, runners["__default__"])()
