@@ -5,5 +5,5 @@ from trailine_api.routers.v2 import router as v2_router
 
 router = APIRouter()
 
-router.include_router(v1_router, prefix="/v1", tags=["v1"])
-router.include_router(v2_router, prefix="/v2", tags=["v2"])
+router.include_router(v1_router, prefix="/v1")
+router.include_router(v2_router, prefix="/v2")
