@@ -2,7 +2,6 @@ name: "🐞 버그 리포트 (Bug Report)"
 description: 버그를 신고하여 프로젝트 개선에 기여해주세요.
 title: ""
 labels: ["fix"]
-projects: []
 assignees:
   - recoma96
 body:
