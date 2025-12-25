@@ -1,26 +1,27 @@
 name: "🛠️ 개발 작업 (Development Task)"
 description: "내부 개발자를 위한 기능 구현 및 작업 카드입니다."
-title: "[TASK] "
-labels: ["feature"]
+title: ""
+labels: []
+projects: 
 assignees:
   - recoma96
 body:
   - type: textarea
-    id: feature-description
+    id: background-of-task
     attributes:
-      label: "어떤 기능을 구현해야 하나요? (Feature to implement)"
-      description: "구현할 기능에 대해 명확하고 간결하게 설명해주세요."
-      placeholder: "예: 사용자 프로필 수정 API 구현"
+      label: "배경"
+      description: "이 작업을 하게 된 계기를 알려주세요"
+      placeholder: "예: 특정 API에 아래와 같은 파라미터가 추기로 필요함."
     validations:
       required: true
   - type: textarea
-    id: related-problem
+    id: task-information
     attributes:
-      label: "관련된 문제가 있나요? (Is this related to a problem?)"
-      description: "이 작업이 해결하려는 특정 문제가 있다면 설명해주세요. (선택 사항)"
-      placeholder: "예: 현재 사용자가 닉네임을 변경할 수 없어 불편함이 있습니다."
+      label: "작업 내용"
+      description: "작업을 진행할 내용을 대략적으로 알려주세요"
+      placeholder: "예: 해당 API애 'a' 파라미터 추가"
     validations:
-      required: false
+      required: true
   - type: textarea
     id: implementation-details
     attributes:
@@ -31,13 +32,3 @@ body:
         - HTTP Method: PATCH
         - Request Body: { "nickname": "new_nickname" }
         - ...
-  - type: checkboxes
-    id: checklist
-    attributes:
-      label: "작업 체크리스트 (Task Checklist)"
-      description: "작업을 진행하면서 아래 항목들을 체크해주세요."
-      options:
-        - label: 기능 구현 완료 (Feature implementation complete)
-        - label: 단위/통합 테스트 코드 작성 (Unit/Integration tests written)
-        - label: 관련 문서 업데이트 (Documentation updated)
-        - label: 코드 리뷰 요청 (Code review requested)
