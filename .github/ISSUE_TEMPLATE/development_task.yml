@@ -1,6 +1,6 @@
 name: "🛠️ 개발 작업 (Development Task)"
 description: "내부 개발자를 위한 기능 구현 및 작업 카드입니다."
-title: ""
+title: "[DEV] "
 labels: []
 assignees:
   - recoma96
