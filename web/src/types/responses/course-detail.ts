@@ -26,4 +26,6 @@ export interface CourseDetailSchemaResponse {
     difficulty: Difficulty;
     styles: Style;
     images: Image[];
+    length: number;
+    duration: number;
 };

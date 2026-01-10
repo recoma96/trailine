@@ -54,14 +54,22 @@ const htmlDescription = course?.description ? marked.parse(course.description) :
     <div class="text-center mb-6">
         <h2>{course?.name}</h2>
         <p>{mainAddress}</p>
+    </div>
 
-        <!-- 난이도뱃지 -->
-        <div class="flex justify-center mt-4">
-            <div class={`badge badge-lg bg-[${COURSE_DIFFICULTY_COLORS[course?.difficulty?.level || 0]}] text-white rounded-none py-4 w-[180px] font-bold text-left`}>
-                Lv.{course?.difficulty?.level} | {course?.difficulty?.code}
-            </div>
+    <!-- 난이도 / 코스 길이 / 쇼요시간 -->
+    <div class="flex justify-center gap-4 mb-6">
+        <div class={`bg-[${COURSE_DIFFICULTY_COLORS[course?.difficulty?.level || 0]}] text-white px-4 py-2 rounded-lg`}>
+            <p class="text-sm">난이도</p>
+            <p class="font-bold">Lv. {course?.difficulty?.level} | {course?.difficulty?.name}</p>
         </div>
-        <p>{course?.difficulty?.name}</p>
+        <div class="bg-gray-100 px-4 py-2 rounded-lg">
+            <p class="text-sm">총 길이</p>
+            <p class="font-bold">{course?.length} km</p>
+        </div>
+        <div class="bg-gray-100 px-4 py-2 rounded-lg">
+            <p class="text-sm">소요 시간</p>
+            <p class="font-bold">{course?.duration} 분</p>
+        </div>
     </div>
 
     <!-- 코스 이미지 슬라이더 -->
