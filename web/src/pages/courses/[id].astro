@@ -43,6 +43,8 @@ if (course?.roadAddresses) {
 const NaverMapsAPIClient = import.meta.env.NAVER_MAPS_API_CLIENT;
 
 const htmlDescription = course?.description ? marked.parse(course.description) : "";
+
+const difficultyBackgroundColor = course ? COURSE_DIFFICULTY_COLORS[course.difficulty.level] : "#CCCCCC";
 --- 
 
 <DefaultLayout>
@@ -58,9 +60,9 @@ const htmlDescription = course?.description ? marked.parse(course.description) :
 
     <!-- 난이도 / 코스 길이 / 쇼요시간 -->
     <div class="flex justify-center gap-4 mb-6">
-        <div class={`bg-[${COURSE_DIFFICULTY_COLORS[course?.difficulty?.level || 0]}] text-white px-4 py-2 rounded-lg`}>
-            <p class="text-sm">난이도</p>
-            <p class="font-bold">Lv. {course?.difficulty?.level} | {course?.difficulty?.name}</p>
+        <div class="px-4 py-2 rounded-lg" style={`background-color: ${difficultyBackgroundColor}; color: white;`}>
+            <p class="font-bold">Lv. {course?.difficulty?.level} | {course?.difficulty?.code}</p>
+            <p class="text-sm">{course?.difficulty?.name}</p>
         </div>
         <div class="bg-gray-100 px-4 py-2 rounded-lg">
             <p class="text-sm">총 길이</p>
