@@ -4,6 +4,7 @@ import CourseMap from "./CourseMap";
 import CheckIcon from "@/components/client/CheckIcon";
 import { INTERVAL_DIFFICULTY_COLORS } from "@/vars/colors";
 import ImageSlider from "@/components/client/ImageSlider";
+import { minutesToKoreanDuration } from "@/lib/string-mapper";
 
 
 interface Props {
@@ -56,7 +57,7 @@ const CourseIntervalDetail: React.FC<Props> = ({courseId} : Props) => {
                             <div
                                 className="collapse-title font-semibold text-white lg:max-w-[900px] lg:w-auto w-full"
                                 style={{background: INTERVAL_DIFFICULTY_COLORS[interval.difficulty.level]}}>{
-                                    idx + 1}. {interval.name} [{interval.difficulty.name}]
+                                    idx + 1}. {interval.name} [{interval.difficulty.name}] ({interval.length} km, {minutesToKoreanDuration(interval.duration)})
                             </div>
                             <div className="collapse-content text-sm pt-5">
                                 {interval.images && interval.images.length > 0 && (

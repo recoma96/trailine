@@ -84,6 +84,9 @@ class CourseIntervalFactory(BaseFactory):
     place_a = factory.SubFactory(PlaceFactory)
     place_b = factory.SubFactory(PlaceFactory)
     difficulty = factory.SubFactory(CourseIntervalDifficultyFactory)
+    length_m = factory.fuzzy.FuzzyInteger(100, 1000)
+    duration_ab_minutes = factory.fuzzy.FuzzyInteger(10, 60)
+    duration_ba_minutes = factory.fuzzy.FuzzyInteger(10, 60)
 
     # CourseInterval 생성 시 CourseImage 2개를 함께 생성합니다.
     images = factory.List([factory.SubFactory(CourseIntervalImageFactory, sort_order=i+1) for i in range(2)])

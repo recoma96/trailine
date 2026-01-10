@@ -81,10 +81,10 @@ const CourseSearchList: React.FC = () => {
                                 )}
                             </td>
                             <td>{course.courseStyle.name}</td>
-                            <td><div className={
-                                `bg-[${COURSE_DIFFICULTY_COLORS[course.difficulty.level]}] `
-                                + `text-white px-2 py-1.5 rounded-md text-center w-15 text-base`
-                            }>Lv.{course.difficulty.level}</div></td>
+                            <td><div
+                                className="text-white px-2 py-1.5 rounded-md text-center w-15 text-base"
+                                style={{ backgroundColor: COURSE_DIFFICULTY_COLORS[course.difficulty.level] }}
+                            >Lv.{course.difficulty.level}</div></td>
                         </tr>
                     ))}
                 </tbody>

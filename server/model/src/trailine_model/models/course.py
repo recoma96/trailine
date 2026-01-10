@@ -21,6 +21,9 @@ class CourseIntervalDifficulty(Base, TimeStampModel):
     level: Mapped[int] = mapped_column(SmallInteger, nullable=False, unique=True, comment="난이도 수치(레벨)")
     description: Mapped[str] = mapped_column(Text, nullable=True)
 
+    def __str__(self):
+        return f"Lv.{self.level} {self.code} ({self.name})"
+
 
 class CourseDifficulty(Base, TimeStampModel):
     __tablename__ = "course_difficulty"
@@ -62,6 +65,10 @@ class CourseInterval(Base, TimeStampModel):
     place_a: Mapped[Place] = relationship(foreign_keys=[place_a_id])
     place_b: Mapped[Place] = relationship(foreign_keys=[place_b_id])
     difficulty: Mapped[CourseIntervalDifficulty] = relationship(foreign_keys=[course_interval_difficulty_id])
+
+    length_m: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"), comment="길이(m)")
+    duration_ab_minutes: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"), comment="소요시간(분, 정방향(a->b)")
+    duration_ba_minutes: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"), comment="소요시간(분, 역방향(b->a)")
 
     courses: Mapped[List["CourseCourseInterval"]] = relationship(
         back_populates="interval",

@@ -58,6 +58,20 @@ class ICourseRepository(metaclass=ABCMeta):
 
     @abstractmethod
     def get_intervals(self, session: Session, course_id: int) -> Tuple[List[CourseInterval], List[bool]]:
+        """
+        특정 코스에 대해 구간 정보 가져오는 구문
+        """
+        pass
+
+    @abstractmethod
+    def get_sum_of_length_and_duration(self, session: Session, course_id: int) -> Tuple[int, int]:
+        """
+        대상 코스의 길이와 소요시간을 구하는 함수
+
+        :param session: DB session
+        :param course_id: 코스 아이디
+        :return: (length, duration) -> (길이 m단위, 소요시간 초단위)
+        """
         pass
 
 
@@ -195,6 +209,29 @@ class CourseRepository(ICourseRepository):
         )
         result = session.execute(stmt).scalars().all()
         return result
+
+    def get_sum_of_length_and_duration(self, session: Session, course_id: int) -> Tuple[int, int]:
+        stmt = (
+            select(
+                CourseInterval.length_m.label("length"),
+                CourseInterval.duration_ab_minutes.label("ab_duration"),
+                CourseInterval.duration_ba_minutes.label("ba_duration"),
+                CourseCourseInterval.is_reversed.label("is_reversed"),
+            )
+            .join(CourseInterval, CourseCourseInterval.interval_id == CourseInterval.id)
+            .where(CourseCourseInterval.course_id == course_id)
+        )
+
+        rows = session.execute(stmt).mappings().all()
+
+        total_length = 0
+        total_duration = 0
+
+        for row in rows:
+            total_length += row["length"]
+            total_duration += row["ab_duration"] if not row["is_reversed"] else row["ba_duration"]
+
+        return total_length, total_duration
 
     def get_course_detail(self, session: Session, course_id: int) -> Optional[SQLRow]:
         base_stmt = self._build_course_information_query().add_columns(

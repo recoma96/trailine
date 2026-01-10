@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 from sqlalchemy.orm import Session
 from starlette.testclient import TestClient
@@ -8,9 +8,11 @@ from httpx import Response
 from tests.integrations.common import setup_course_data_no_1
 
 
-def _setup_data(session: Session):
-    setup_course_data_no_1()
-    session.commit()
+@pytest.fixture(scope="function")
+def setup_data(dbsession: Session):
+    total_length, duration = setup_course_data_no_1()
+    dbsession.commit()
+    return total_length, duration
 
 
 @pytest.mark.parametrize(
@@ -22,14 +24,17 @@ def _setup_data(session: Session):
 )
 def test_detail_course(
         client: TestClient,
-        dbsession: Session,
+        setup_data: Tuple[float, int],
         params: Dict,
         error_code: int,
 ):
-    _setup_data(dbsession)
-
     # when
     response: Response = client.get(f"/api/v1/courses/{params['course_id']}")
 
     # then
     assert response.status_code == error_code
+    if response.status_code == 200:
+        result = response.json()
+        expected_length, expected_duration = setup_data
+        assert result["length"] == expected_length
+        assert result["duration"] == expected_duration

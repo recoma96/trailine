@@ -31,6 +31,8 @@ export interface Interval {
     startPlace: Place;
     endPlace: Place;
     points: IntervalPoint[];
+    length: number;
+    duration: number;
 };
 
 
