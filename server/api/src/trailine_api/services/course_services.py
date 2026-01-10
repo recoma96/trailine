@@ -1,3 +1,4 @@
+import math
 from abc import ABCMeta, abstractmethod
 from typing import Optional, List, cast, Tuple, Dict
 
@@ -140,8 +141,10 @@ class CourseService(ICourseService):
         return total_count, [item for item in formatted_results if item is not None]
 
     def get_course_detail(self, course_id: int) -> Optional[CourseDetailSchema]:
+        total_length, total_duration = 0, 0
         with (SessionLocal() as session, session.begin()):
             raw_result = self._course_repository.get_course_detail(session, course_id)
+            total_length, total_duration = self._course_repository.get_sum_of_length_and_duration(session, course_id)
 
         if raw_result is None:
             return None
@@ -157,7 +160,9 @@ class CourseService(ICourseService):
             images=[
                 CourseImageSchema(**image)
                 for image in raw_result["images"]
-            ]
+            ],
+            length=math.floor((total_length / 1000) * 10) / 10,
+            duration=total_duration,
         )
 
         return course_detail

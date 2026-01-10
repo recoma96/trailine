@@ -50,6 +50,8 @@ class CourseDetailSchema(BaseModel):
     difficulty: CourseDifficultySchema = Field(..., description="코스 난이도 정보")
     course_style: CourseStyleSchema = Field(..., alias="courseStyle", description="코스 스타일")
     images: List[CourseImageSchema] = Field(..., description="코스 이미지 리스트 (sort_order 오름차순으로 정렬)")
+    length: float = Field(..., description="코스 길이 (km단위, 소수 첫째자리 까지만 출력)")
+    duration: int = Field(..., description="소요시간 합 (분단위)")
 
 
 class CourseIntervalImageSchema(BaseModel):
