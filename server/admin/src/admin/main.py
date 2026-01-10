@@ -163,6 +163,9 @@ class CourseIntervalAdmin(ModelView, model=CourseInterval):
         CourseInterval.name,
         CourseInterval.place_a,
         CourseInterval.place_b,
+        CourseInterval.length_m,
+        CourseInterval.duration_ab_minutes,
+        CourseInterval.duration_ba_minutes,
         CourseInterval.created_at,
         CourseInterval.updated_at,
     ]
@@ -173,6 +176,18 @@ class CourseIntervalAdmin(ModelView, model=CourseInterval):
         "place_b": lambda m, v: Markup(
             f"<a href='/admin/place/edit/{m.place_b.id}'>{m.place_b.name}</a>"
         ),
+        "length_m": lambda m, v: f"{m.length_m}m",
+        "duration_ab_minutes": lambda m, v: f"{m.duration_ab_minutes}분",
+        "duration_ba_minutes": lambda m, v: f"{m.duration_ba_minutes}분",
+        "created_at": lambda m, v: m.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        "updated_at": lambda m, v: m.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    column_labels = {
+        "place_a": "시작지점",
+        "place_b": "끝지점",
+        "length_m": "길이 (m)",
+        "duration_ab_minutes": "소요시간 - 정방향 (분)",
+        "duration_ba_minutes": "소요시간 - 역방향 (분)",
     }
     form_overrides = {
         "geom": FileField,
