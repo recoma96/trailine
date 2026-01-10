@@ -19,12 +19,13 @@ type Image = {
 interface ImageSliderProps {
     images: Image[];
     className?: string;
+    height: number;
 }
 
-const ImageSlider: React.FC<ImageSliderProps> = ({ images, className }) => {
+const ImageSlider: React.FC<ImageSliderProps> = ({ images, className, height }) => {
     if (className === undefined) className = "";
     return (
-        <div className={`${className}`}>
+        <div className={`${className} bg-black`}>
             <Swiper
                 loop={true}
                 cssMode={true}
@@ -37,14 +38,15 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ images, className }) => {
             >
                 {images.map((image, index) => (
                     <SwiperSlide key={index}>
-                        <div className="relative w-full h-full">
-                            <div className="top-0 left-0 bg-black bg-opacity-50 text-white p-2 text-sm">
+                        <div className="relative flex">
+                            <div className="absolute left-0 top-0 z-10 bg-black bg-opacity-50 p-2 text-sm text-white">
                                 {image.title}
                             </div>
                             <img 
                                 src={image.url} 
                                 alt={image.title} 
-                                className="w-full h-auto max-h-[600px] object-contain block"
+                                className="block w-full object-contain"
+                                style={{height: `${height}px`}}
                             />
                         </div>
                     </SwiperSlide>

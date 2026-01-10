@@ -51,8 +51,8 @@ const CourseMap: React.FC<Props> = ({intervalCount, intervals, className} : Prop
 
 
     return (
-        <div>
-            {mapRef && <div ref={mapRef} className={`${className}`} />}
+        <div  className={`${className}`}>
+            {mapRef && <div ref={mapRef} className="h-full" />}
             {/* mapRef의 초기 데이터가 null임에도 useEffect가 작동되는 이유는, div태그에 ref으로 연결을 했기 때문이다. */}
         </div>
     )
