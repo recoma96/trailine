@@ -20,4 +20,6 @@ def test_list_course_difficulty(client: TestClient, dbsession: Session):
 
     # then
     assert response.status_code == 200
-    assert len(response.json()) == 2
+    results = response.json()
+    assert len(results) == 2
+    assert [r["level"] for r in results] == [1, 2] # 레벨이 낮은 순대로 나열되어야 한다.
