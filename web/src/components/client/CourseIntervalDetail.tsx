@@ -48,14 +48,14 @@ const CourseIntervalDetail: React.FC<Props> = ({courseId} : Props) => {
 
     return (
         <div className="lg:flex lg:gap-10 w-full">
-            <CourseMap intervalCount={intervalCount} intervals={intervals} className="h-[500px] lg:w-[600px] w-full" />
-            <ul className="mt-10 flex flex-col gap-y-3">
+            <CourseMap intervalCount={intervalCount} intervals={intervals} className="w-full h-[600px] lg:w-full lg:flex-1 lg:min-w-0" />
+            <ul className="mt-10 lg:flex-1 lg:min-w-0 flex flex-col gap-y-3">
                 {intervals.map((interval, idx) => (
                     <li>
                         <div className="collapse bg-base-100 border-base-300 border">
                             <input type="checkbox" />
                             <div
-                                className="collapse-title font-semibold text-white lg:max-w-[900px] lg:w-auto w-full"
+                                className="collapse-title font-semibold text-white lg:w-auto w-full"
                                 style={{background: INTERVAL_DIFFICULTY_COLORS[interval.difficulty.level]}}>{
                                     idx + 1}. {interval.name} [{interval.difficulty.name}] ({interval.length} km, {minutesToKoreanDuration(interval.duration)})
                             </div>
@@ -64,8 +64,8 @@ const CourseIntervalDetail: React.FC<Props> = ({courseId} : Props) => {
                                     <ImageSlider images={interval.images.map((image) => ({
                                         url: image.url,
                                         title: image.title ?? "",
-                                        description: image.description
-                                    }))} className="max-w-full mx-auto mb-4" />
+                                        description: image.description,
+                                    }))} className="max-w-full mx-auto mb-4" height={400} />
                                 )}
                                 <p>{interval.description}</p>
                             </div>
@@ -74,7 +74,6 @@ const CourseIntervalDetail: React.FC<Props> = ({courseId} : Props) => {
                 ))}
             </ul>
         </div>
-        
     );
 }
 

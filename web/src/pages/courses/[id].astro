@@ -77,7 +77,7 @@ const difficultyBackgroundColor = course ? COURSE_DIFFICULTY_COLORS[course.diffi
 
     <!-- 코스 이미지 슬라이더 -->
     {course?.images && course.images.length > 0 && (
-        <ImageSlider client:load images={course.images} className="max-w-[800px] mx-auto" />
+        <ImageSlider client:load images={course.images} className="w-full mx-auto" height={700} />
     )}
 
     <!-- 코스 설명 글상자 -->

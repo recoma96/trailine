@@ -3,6 +3,15 @@
 등산 및 트레킹 코스에 대한 가이드를 알려주는 서비스 [릴리즈 노트](https://github.com/recoma96/trailine/releases)
 
 
+## Demo Screenshots
+
+![](docs/imgs/readme-1.png)
+![](docs/imgs/readme-2.png)
+![](docs/imgs/readme-3.png)
+
+
+* * *
+
 ## 개발 목표
 
 * 코스 길이, 난이도, 일주일 날시, 주의사항 등 최대한 상세하게 알려줄 수 있다.
