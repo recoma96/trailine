@@ -8,5 +8,10 @@ body {
     font-style: normal;
 }
 
-h1 { @apply text-[44px] }
-h2 { @apply text-[38px] }
+h1 { @apply text-[40px] my-2 }
+h2 { @apply text-[32px] my-2 }
+h3 { @apply text-[20px] my-2 }
+
+strong { @apply font-bold }
+
+blockquote { @apply border-l-2 border-gray-300 pl-4 italic text-gray-600 }
