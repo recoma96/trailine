@@ -181,6 +181,7 @@ class CourseService(ICourseService):
                 start_place_location = self._get_location_from_place(start_place)
                 end_place_location = self._get_location_from_place(end_place)
                 track_points = self._get_points(interval, is_reversed_list[i])
+                duration = interval.duration_ab_minutes if not is_reversed_list[i] else interval.duration_ba_minutes
 
                 interval_schemas.append(CourseIntervalSchema(
                     name=interval.name,
@@ -220,7 +221,9 @@ class CourseService(ICourseService):
                     points=[
                         PointSchema(lat=p["lat"], lon=p["lon"], ele=p["ele"])
                         for p in track_points
-                    ]
+                    ],
+                    length=math.floor((interval.length_m / 1000) * 10) / 10,
+                    duration=duration
                 ))
 
         return interval_schemas

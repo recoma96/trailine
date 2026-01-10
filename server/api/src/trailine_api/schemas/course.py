@@ -75,6 +75,8 @@ class CourseIntervalSchema(BaseModel):
     start_place: PlaceSchema = Field(...,alias="startPlace", description="시작지점")
     end_place: PlaceSchema = Field(..., alias="endPlace", description="종료지점")
     points: List[PointSchema] = Field(..., description="포인트(위경도) 경로")
+    length: float = Field(..., description="길이 (km)")
+    duration: int = Field(..., description="소요시간 (분)")
 
 
 class GettingCourseIntervalResponseSchema(BaseModel):
