@@ -1,9 +1,10 @@
 --- 
 export const prerender = false; // 이 페이지는 빌드 시점에 미리 렌더링되지 않습니다. (SSR)
 
+import { marked } from "marked";
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import ImageSlider from "@/components/client/ImageSlider";
-import type { CourseDetailSchemaResponse } from "@/response-types/course-detail";
+import type { CourseDetailSchemaResponse } from "@/types/responses/course-detail";
 import CourseIntervalDetail from "@/components/client/CourseIntervalDetail";
 
 
@@ -39,6 +40,8 @@ if (course?.roadAddresses) {
 }
 
 const NaverMapsAPIClient = import.meta.env.NAVER_MAPS_API_CLIENT;
+
+const htmlDescription = course?.description ? marked.parse(course.description) : "";
 --- 
 
 <DefaultLayout>
@@ -66,7 +69,7 @@ const NaverMapsAPIClient = import.meta.env.NAVER_MAPS_API_CLIENT;
     )}
 
     <!-- 코스 설명 글상자 -->
-    <p class="my-10 p-5 border text-left">{course?.description}</p>
+    <div class="my-10 p-5 border text-left prose" set:html={htmlDescription} />
     
     <!-- 코스 구간 세부정보  -->
     <CourseIntervalDetail courseId={course?.id} client:load />
