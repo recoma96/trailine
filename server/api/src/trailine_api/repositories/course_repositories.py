@@ -63,7 +63,7 @@ class ICourseRepository(metaclass=ABCMeta):
 
 class CourseDifficultyRepository(ICourseDifficultyRepository):
     def get_course_difficulty_all(self, session: Session) -> Sequence[CourseDifficulty]:
-        stmt = select(CourseDifficulty)
+        stmt = select(CourseDifficulty).order_by(CourseDifficulty.level)
         return session.execute(stmt).scalars().all()
 
 
