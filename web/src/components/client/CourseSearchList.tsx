@@ -1,6 +1,7 @@
 import { getPaginationItems } from "@/lib/pagination";
 import { useEffect, useState } from "react";
 import type { CourseSearchResponseSchema } from "@/types/responses/course-list";
+import { COURSE_DIFFICULTY_COLORS } from "@/vars/colors";
 
 const CourseSearchList: React.FC = () => {
     const [searchResult, setSearchResult] = useState<CourseSearchResponseSchema | null>(null);
@@ -80,7 +81,10 @@ const CourseSearchList: React.FC = () => {
                                 )}
                             </td>
                             <td>{course.courseStyle.name}</td>
-                            <td>Lv.{course.difficulty.level}</td>
+                            <td><div className={
+                                `bg-[${COURSE_DIFFICULTY_COLORS[course.difficulty.level]}] `
+                                + `text-white px-2 py-1.5 rounded-md text-center w-15 text-base`
+                            }>Lv.{course.difficulty.level}</div></td>
                         </tr>
                     ))}
                 </tbody>
