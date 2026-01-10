@@ -21,6 +21,9 @@ class CourseIntervalDifficulty(Base, TimeStampModel):
     level: Mapped[int] = mapped_column(SmallInteger, nullable=False, unique=True, comment="난이도 수치(레벨)")
     description: Mapped[str] = mapped_column(Text, nullable=True)
 
+    def __str__(self):
+        return f"Lv.{self.level} {self.code} ({self.name})"
+
 
 class CourseDifficulty(Base, TimeStampModel):
     __tablename__ = "course_difficulty"
