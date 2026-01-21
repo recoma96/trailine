@@ -80,7 +80,8 @@ class CourseIntervalFactory(BaseFactory):
     )
 
     name = factory.LazyFunction(lambda: fake.name()[:16])
-    description = factory.Faker("sentence")
+    description_ab = "정방향 설명"
+    description_ba = "역방향 설명"
     place_a = factory.SubFactory(PlaceFactory)
     place_b = factory.SubFactory(PlaceFactory)
     difficulty = factory.SubFactory(CourseIntervalDifficultyFactory)
