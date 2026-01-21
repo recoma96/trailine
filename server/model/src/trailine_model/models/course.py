@@ -53,7 +53,8 @@ class CourseInterval(Base, TimeStampModel):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(32), nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=True)
+    description_ab: Mapped[str] = mapped_column(Text, nullable=True, comment="설명 (정방향)")
+    description_ba: Mapped[str] = mapped_column(Text, nullable=True, comment="설명 (역방향)")
     geom: Mapped[WKBElement] = mapped_column(Geometry("LINESTRINGZ", srid=4326),
                                              nullable=False, comment="간선 GPX데이터 (위도, 경도, 고도)")
 
