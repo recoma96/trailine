@@ -188,6 +188,8 @@ class CourseIntervalAdmin(ModelView, model=CourseInterval):
         "length_m": "길이 (m)",
         "duration_ab_minutes": "소요시간 - 정방향 (분)",
         "duration_ba_minutes": "소요시간 - 역방향 (분)",
+        "description_ab": "설명 - 정방향",
+        "description_ba": "설명 - 역방향",
     }
     form_overrides = {
         "geom": FileField,
