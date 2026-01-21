@@ -182,10 +182,11 @@ class CourseService(ICourseService):
                 end_place_location = self._get_location_from_place(end_place)
                 track_points = self._get_points(interval, is_reversed_list[i])
                 duration = interval.duration_ab_minutes if not is_reversed_list[i] else interval.duration_ba_minutes
+                description = interval.description_ab if not is_reversed_list[i] else interval.description_ba
 
                 interval_schemas.append(CourseIntervalSchema(
                     name=interval.name,
-                    description=interval.description,
+                    description=description,
                     images=[
                         CourseIntervalImageSchema(
                             title=image.title,
