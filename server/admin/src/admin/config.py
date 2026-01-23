@@ -7,6 +7,8 @@ load_dotenv()
 
 class _CommonConfig:
     REGION = "ap-northeast-2"
+    IMAGE_MAX_LENGTH = 1080
+
     class S3:
         BUCKET_NAME = "project-trailine"
         IMAGE_PUBLIC_BASE_URL = f"https://project-trailine.s3.ap-northeast-2.amazonaws.com"
