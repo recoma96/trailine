@@ -10,25 +10,28 @@ Trailine 서비스의 백엔드 서버입니다. 이 프로젝트는 모노레�
 /
 │── admin/      # 관리자 페이지 (Admin Dashboard)
 │── api/        # 메인 API 서버
-│── model/      # 데이터베이스 ORM Model (공용 라이브ar리)
+│── model/      # 데이터베이스 ORM Model (공용 라이브러리)
+│── scripts/    # 스크립트 파일
 └── pyproject.toml
 ```
 
 *   **`admin`**: 서비스 관리를 위한 SQLAdmin+Web 기반의 관리자 페이지입니다.
 *   **`api`**: 핵심 API 서버입니다.
 *   **`model`**: `api`와 `admin` 등 여러 패키지에서 공통으로 사용하는 데이터베이스 모델 및 관련 유틸리티를 포함하는 라이브러리입니다.
+*   **`scripts`**: 데이터 적재, 기타 분석 등 스크립트 파일을 관리 및 실행하는 리포지토리 입니다.
 
 ## ✨ 기술 스택
 
 * **`api`**:
   * FastAPI
-  * sqlalchemy
   * pytest
 * **`admin`**:
   * SQLAdmin
-  * sqlalchemy
 * **`model`**:
-  * SQLAdmin
+  * sqlalchemy
+* **`scripts`**:
+  * openpyxl
+  * pandas
 
 ## Docs
 
@@ -37,3 +40,4 @@ Trailine 서비스의 백엔드 서버입니다. 이 프로젝트는 모노레�
 * [api](./api/README.md)
 * [model](./model/README.md)
 * [admin](./admin/README.md)
+* [scripts](./scripts/README.md)

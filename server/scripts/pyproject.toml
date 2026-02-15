@@ -1,0 +1,22 @@
+[project]
+name = "trailine-scripts"
+version = "0.1.0"
+description = "트레일라인 데이터 처리 및 관리 스크립트"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pandas>=2.2.3",
+    "openpyxl>=3.1.5",
+    "python-dotenv>=1.2.1",
+    "trailine-model",
+]
+
+[tool.setuptools]
+packages = ["trailine_scripts"]
+package-dir = {"" = "src"}
+
+[tool.uv.sources]
+trailine-model = { workspace = true }
+
+[project.scripts]
+add-kma-mountain-areas = "trailine_scripts.add_kma_mountain_areas:main"

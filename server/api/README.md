@@ -23,6 +23,8 @@ server $ uv pip install -e model # DB Model 모듈 설치
 
 server $ uv pip install -e api # API 서버 설치
 
+server $ uv pip install -e scripts # 스크립트 설치
+
 server $ source .venv/bin/activate
 
 server $ cd api
