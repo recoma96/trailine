@@ -1,10 +1,12 @@
 import os
+import re
 from io import BytesIO
 from typing import BinaryIO, Tuple
 from uuid import uuid4
 
 import boto3
 from botocore.exceptions import NoCredentialsError
+from geoalchemy2 import WKTElement
 from mypy_boto3_s3 import S3Client
 from fastapi import UploadFile, HTTPException
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
@@ -129,3 +131,16 @@ def upload_image_to_s3(image: UploadFile, base_path: str, dirpath: str) -> str:
         )
 
     return f"{config.S3.IMAGE_PUBLIC_BASE_URL}/{s3_path}"
+
+
+def parse_string_to_lat_lng(s: str) -> Tuple[float, float]:
+    match = re.match(r"^\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*$", s)
+    if not match:
+        raise ValueError("Parsing Lat/Lng failed")
+    lat, lon = match.groups()
+    return float(lat), float(lon)
+
+
+def parse_location_to_wkt(lat: float, lon: float) -> WKTElement:
+    wkt_point = f"POINT({lon} {lat})"
+    return WKTElement(wkt_point, srid=4326)

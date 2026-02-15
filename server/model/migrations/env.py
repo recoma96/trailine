@@ -8,6 +8,7 @@ from trailine_model.base import DATABASE_URL, Base
 from trailine_model.models.user import *
 from trailine_model.models.course import *
 from trailine_model.models.place import *
+from trailine_model.models.forecast import *
 
 
 # this is the Alembic Config object, which provides
