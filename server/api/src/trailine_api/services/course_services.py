@@ -23,7 +23,7 @@ from trailine_api.schemas.course import (
 )
 from trailine_api.schemas.place import PlaceSchema
 from trailine_api.schemas.point import PointSchema
-from trailine_model.base import SessionLocal
+from trailine_api.common.db import session_scope
 from trailine_model.models.place import Place
 from trailine_model.models.course import CourseInterval
 
@@ -83,7 +83,7 @@ class CourseService(ICourseService):
             page: int,
             page_size: int
     ) -> Tuple[int, List[CourseSearchSchema]]:
-        with (SessionLocal() as session, session.begin()):
+        with session_scope() as session:
             total_count, course_id_list = self._course_repository.get_course_ids_by_search(
                 session, word, difficulties, course_styles, page, page_size
             )
@@ -142,7 +142,7 @@ class CourseService(ICourseService):
 
     def get_course_detail(self, course_id: int) -> Optional[CourseDetailSchema]:
         total_length, total_duration = 0, 0
-        with (SessionLocal() as session, session.begin()):
+        with session_scope() as session:
             raw_result = self._course_repository.get_course_detail(session, course_id)
             total_length, total_duration = self._course_repository.get_sum_of_length_and_duration(session, course_id)
 
@@ -169,7 +169,7 @@ class CourseService(ICourseService):
 
     def get_course_intervals(self, course_id: int) -> Optional[List[CourseIntervalSchema]]:
         interval_schemas: List[CourseIntervalSchema] = []
-        with (SessionLocal() as session, session.begin()):
+        with session_scope() as session:
             # 구간 데이터 및 역방향 여부 가져오기
             intervals, is_reversed_list = self._course_repository.get_intervals(session, course_id)
             if not intervals:
@@ -277,7 +277,7 @@ class CourseService(ICourseService):
         return track_points
 
     def get_course_difficulty_list(self) -> List[CourseDifficultySchema]:
-        with (SessionLocal() as session, session.begin()):
+        with session_scope() as session:
             instances = self._course_difficulty_repository.get_course_difficulty_all(session)
             return [
                 CourseDifficultySchema(
@@ -290,7 +290,7 @@ class CourseService(ICourseService):
             ]
 
     def get_course_style_list(self) -> List[CourseStyleSchema]:
-        with (SessionLocal() as session, session.begin()):
+        with session_scope() as session:
             instances = self._course_style_repository.get_course_style_all(session)
             return [
                 CourseStyleSchema(
