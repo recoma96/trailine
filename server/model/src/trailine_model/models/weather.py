@@ -8,8 +8,8 @@ from geoalchemy2 import Geometry, Geography
 from trailine_model.base import Base, TimeStampModel
 
 
-class KmaMountainForecastArea(Base, TimeStampModel):
-    __tablename__ = "kma_mountain_forecast_area"
+class KmaMountainWeatherArea(Base, TimeStampModel):
+    __tablename__ = "kma_mountain_weather_area"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     code: Mapped[int] = mapped_column(Integer, unique=True, nullable=False, comment="기상청 산악예보 식별번호")

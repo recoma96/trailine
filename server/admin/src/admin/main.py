@@ -25,7 +25,7 @@ from trailine_model.models.course import (
     CourseImage,
     CourseIntervalImage
 )
-from trailine_model.models.forecast import KmaMountainForecastArea
+from trailine_model.models.weather import KmaMountainWeatherArea
 from trailine_model.models.place import Place, PlaceImage
 from trailine_model.models.user import User
 from .base import PatchedAdmin
@@ -362,18 +362,18 @@ class CourseIntervalImageAdmin(ModelView, model=CourseIntervalImage):
         data["url"] = upload_image_to_s3(image, config.S3.BASE_COURSE_INTERVAL_PATH, f"{interval_id}/images")
 
 
-class KmaMountainForecastAreaAdmin(ModelView, model=KmaMountainForecastArea):
+class KmaMountainWeatherAreaAdmin(ModelView, model=KmaMountainWeatherArea):
     column_list = [
-        KmaMountainForecastArea.code,
-        KmaMountainForecastArea.name,
+        KmaMountainWeatherArea.code,
+        KmaMountainWeatherArea.name,
     ]
     # 폼에서 geog와 geom 필드를 제외합니다.
     form_excluded_columns = [
-        KmaMountainForecastArea.id,
-        KmaMountainForecastArea.geog,
-        KmaMountainForecastArea.geom,
-        KmaMountainForecastArea.created_at,
-        KmaMountainForecastArea.updated_at
+        KmaMountainWeatherArea.id,
+        KmaMountainWeatherArea.geog,
+        KmaMountainWeatherArea.geom,
+        KmaMountainWeatherArea.created_at,
+        KmaMountainWeatherArea.updated_at
     ]
 
     # 폼을 동적으로 생성하고 'geo' 필드를 추가합니다.
@@ -409,4 +409,4 @@ admin.add_view(CourseAdmin)
 admin.add_view(CourseCourseIntervalAdmin)
 admin.add_view(CourseImageAdmin)
 admin.add_view(CourseIntervalImageAdmin)
-admin.add_view(KmaMountainForecastAreaAdmin)
+admin.add_view(KmaMountainWeatherAreaAdmin)
