@@ -72,7 +72,4 @@ def setup_course_data_no_1():
             + interval_a_to_c.duration_ba_minutes
     )
 
-    print("====")
-    print(total_length, duration)
-
     return math.floor(total_length / 1000 * 10) / 10, duration
