@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from typing import Any, Dict, Optional, Type, Union, List
 
 import httpx
@@ -6,19 +7,14 @@ from pydantic import BaseModel, ValidationError
 
 logger = logging.getLogger(__name__)
 
+
+@dataclass
 class ExternalApiResponse:
     """외부 API 응답 결과를 담는 클래스"""
-    def __init__(
-        self,
-        status_code: int,
-        data: Union[Dict[str, Any], List[Any], Any, None] = None,
-        raw_body: Any = None,
-        error_msg: Optional[str] = None
-    ):
-        self.status_code = status_code
-        self.data = data  # 파싱된 Pydantic 모델 혹은 dict/raw data
-        self.raw_body = raw_body  # 파싱 전 원본 데이터
-        self.error_msg = error_msg
+    status_code: int
+    data: Union[Dict[str, Any], List[Any], Any, None] = None
+    raw_body: Any = None
+    error_msg: Optional[str] = None
 
     @property
     def is_success(self) -> bool:
