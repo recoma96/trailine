@@ -10,6 +10,10 @@ from trailine_api.integrations.weather.schemas import (
     KmaMountainWeatherCode,
     KmaMountainWeatherItemParsed,
 )
+from trailine_api.integrations.weather.utils import (
+    get_latest_kma_announcement_dt,
+    is_within_forecast_window
+)
 from trailine_api.repositories.weather_repositories import IWeatherRepository
 from trailine_api.settings import Settings
 
@@ -38,7 +42,7 @@ class KmaMountainWeather(IWeatherProvider):
         response = await self.client.request(
             method="GET",
             path=Settings.KMA_MOUNTAIN_WEATHER_URL,
-            params=self._build_request_params(mountain_num, target_dt),
+            params=self._build_forecast_curent_request_params(mountain_num, target_dt),
             success_model=KmaMountainWeatherApiResponseItem,
         )
 
@@ -49,8 +53,8 @@ class KmaMountainWeather(IWeatherProvider):
         # 파싱해서 추출
         return self._parse_short_term_forecast_data(response.data, target_dt)
 
-    def _build_request_params(self, mountain_num: int, target_dt: datetime) -> Dict[str, Any]:
-        announcement_dt = self._get_latest_kma_announcement_dt(target_dt)
+    def _build_forecast_curent_request_params(self, mountain_num: int, target_dt: datetime) -> Dict[str, Any]:
+        announcement_dt = get_latest_kma_announcement_dt(target_dt)
 
         return {
             "mountainNum": mountain_num,
@@ -84,14 +88,11 @@ class KmaMountainWeather(IWeatherProvider):
 
         for data in datas:
             # 날짜 파싱을 한 번만 수행
-            try:
-                forecast_at = datetime.strptime(
-                    data.forecast_base_date + data.forecast_base_time, "%Y%m%d%H%M")
-            except (ValueError, TypeError):
-                continue
+            forecast_at = datetime.strptime(
+                data.forecast_base_date + data.forecast_base_time, "%Y%m%d%H%M")
 
             # 필터링 로직: 긍정형 함수 사용으로 가독성 향상
-            if not self._is_within_forecast_window(forecast_at, normalized_target_dt):
+            if not is_within_forecast_window(normalized_target_dt, forecast_at):
                 continue
 
             builder_key = data.forecast_base_date + data.forecast_base_time
@@ -105,13 +106,9 @@ class KmaMountainWeather(IWeatherProvider):
                 setter(data.forecast_value)
 
         items = [builder.build() for builder in builders.values()]
-        items.sort(key=lambda item: item.forecast_at)
+        items.sort(key=lambda item: item.offset_hours)
 
         return items
-
-    def _is_within_forecast_window(self, forecast_dt: datetime, target_dt: datetime) -> bool:
-        """예측 시간이 기준 시간으로부터 3시간 이내인지 확인"""
-        return target_dt <= forecast_dt <= target_dt + timedelta(hours=3)
 
     def _select_setter_function(
             self,
@@ -131,29 +128,3 @@ class KmaMountainWeather(IWeatherProvider):
             KmaMountainWeatherCode.WIND_DIRECTION: builder.set_wind_direction,
             KmaMountainWeatherCode.WIND_SPEED: builder.set_wind_speed,
         }.get(category, None)
-
-    def _get_latest_kma_announcement_dt(self, target_dt: datetime) -> datetime:
-        """
-        KMA 발표 시각(02, 05, 08, 11, 14, 17, 20, 23) 중 target_dt와 가장 가까운 과거의 시각을 반환합니다.
-        """
-        announcement_hours = [2, 5, 8, 11, 14, 17, 20, 23]
-
-        # 현재 시간의 시(hour) 정보를 가져옴
-        current_hour = target_dt.hour
-
-        # 발표 시간들 중 current_hour보다 작거나 같은 가장 큰 값을 찾음
-        latest_hour = -1
-        for hour in reversed(announcement_hours):
-            if current_hour >= hour:
-                latest_hour = hour
-                break
-
-        # 만약 current_hour가 02시 이전이면 전날 23시로 설정
-        if latest_hour == -1:
-            announcement_dt = target_dt - timedelta(days=1)
-            announcement_dt = announcement_dt.replace(hour=23, minute=0, second=0, microsecond=0)
-        else:
-            announcement_dt = target_dt.replace(hour=latest_hour, minute=0, second=0, microsecond=0)
-
-        return announcement_dt
-

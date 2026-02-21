@@ -3,6 +3,8 @@ from enum import IntEnum, StrEnum
 
 from pydantic import BaseModel, Field
 
+from trailine_api.integrations.weather.utils import set_offset_hours
+
 
 class KmaMountainSkyStatus(IntEnum):
     SUNNY = 1
@@ -54,6 +56,36 @@ class SnowDepthAmount(IntEnum):
         }.get(kma_value, SnowDepthAmount.NO_SNOW)
 
 
+class DatagoShortTermWeatherCode(StrEnum):
+    TEMPERATURE = "T1H"
+    PRECIPITATION_AMOUNT = "RN1"
+    SKY_STATUS = "SKY"
+    MERIDIONAL_WIND = "UUU"
+    ZONAL_WIND = "VVV"
+    HUMIDITY = "REH"
+    RAIN_TYPE = "PTY"
+    THUNDERSTROKE = "LGT"
+    WIND_DIRECTION = "VEC"
+    WIND_SPEED = "WSD"
+
+
+class DatagoSkyStatus(IntEnum):
+    SUNNY = 1
+    MOSTLY_CLOUDY = 3
+    OVERCAST = 4
+
+
+class DatagoWeatherRainType(IntEnum):
+    NO_RAINY = 0                # 없음
+    WEEK_RAINY = 1              # 비
+    SNOWY_AND_RAINY = 2         # 비와 눈
+    SNOWY = 3                   # 눈
+    SHOWER = 4                  # 소나기 (단기예보 한정)
+    RAINDROP = 5                # 빗방울 (초단기예보 한정)
+    RAINDROPS_SNOW_FLURRY = 6   # 빗방울 + 눈날림 (초단기예보 한정)
+    SNOW_FLURRY = 7             # 눈날림 (초단기예보 한정)
+
+
 class KmaErrorApiSchema(BaseModel):
     status: int
     message: str
@@ -100,12 +132,7 @@ class KmaMountainWeatherItemBuilder:
         return self
 
     def set_offset_hours(self, target_dt: datetime, forecast_at: datetime):
-        target_dt = target_dt.replace(minute=0, second=0, microsecond=0)
-        time_detla = forecast_at - target_dt
-        seconds = time_detla.total_seconds()
-        delta_hours = int(seconds // 3600)
-
-        self._data["offset_hours"] = delta_hours
+        self._data["offset_hours"] = set_offset_hours(target_dt, forecast_at)
         return self
 
     def set_precipitation_amount(self, precipitation_amount: str):
@@ -148,3 +175,111 @@ class KmaMountainWeatherItemBuilder:
 
     def build(self) -> KmaMountainWeatherItemParsed:
         return KmaMountainWeatherItemParsed(**self._data)
+
+
+class DatagoShortTermWeatherItem(BaseModel):
+    base_date: str = Field(alias="baseDate")
+    base_time: str = Field(alias="baseTime")
+    category: DatagoShortTermWeatherCode = Field(alias="category")
+    forecast_date: str = Field(alias="fcstDate")
+    forecast_time: str = Field(alias="fcstTime")
+    forecast_value: str = Field(alias="fcstValue")
+    near_location_x: int = Field(alias="nx")
+    near_location_y: int = Field(alias="ny")
+
+
+class DatagoWeatherHeader(BaseModel):
+    result_code: str = Field(alias="resultCode")
+    result_msg: str = Field(alias="resultMsg")
+
+
+class DatagoWeatherItems(BaseModel):
+    item: list[DatagoShortTermWeatherItem]
+
+
+class DatagoWeatherBody(BaseModel):
+    items: DatagoWeatherItems
+
+
+class DatagoWeatherResponse(BaseModel):
+    header: DatagoWeatherHeader
+    body: DatagoWeatherBody
+
+
+class DatagoShortTermWeatherApiResponse(BaseModel):
+    response: DatagoWeatherResponse
+
+
+class DatagoShortTermWeatherParsed(BaseModel):
+    forecast_at: datetime = Field(description="현재 시간")
+    offset_hours: int = Field(description="x시간 후...")
+    precipitation_amount: float = Field(description="강수랑")
+    sky_status: DatagoSkyStatus = Field(description="하늘 상태")
+    zonal_wind_component: float = Field(description="동서바람성분 (m/s)")
+    meridional_wind_component: float = Field(description="남북바람성분 (m/s)")
+    humidity: float = Field(description="습도 (%)")
+    rain_type: DatagoWeatherRainType = Field(description="강수 형태")
+    thunderstroke: int = Field(description="낙뢰")
+    temperature: float = Field(description="기온")
+    wind_direction: float = Field(description="풍향 (도)")
+    wind_speed: float = Field(description="풍속")
+
+
+class DatagoShortTermWeatherItemBuilder:
+    def __init__(self):
+        self._data = {}
+
+    def set_forecast_at(self, forecast_at: datetime):
+        self._data["forecast_at"] = forecast_at
+        return self
+
+    def set_offset_hours(self, target_dt: datetime, forecast_at: datetime):
+        self._data["offset_hours"] = set_offset_hours(target_dt, forecast_at)
+        return self
+
+    def set_meridional_wind_component(self, wind_component: str):
+        self._data["meridional_wind_component"] = float(wind_component)
+        return self
+
+    def set_zonal_wind_component(self, wind_component: str):
+        self._data["zonal_wind_component"] = float(wind_component)
+        return self
+
+    def set_precipitation_amount(self, precipitation_amount: str):
+        if precipitation_amount == "강수없음":
+            self._data["precipitation_amount"] = 0.0
+        else:
+            self._data["precipitation_amount"] = float(precipitation_amount)
+        return self
+
+    def set_thunderstroke(self, thunderstroke: str):
+        self._data["thunderstroke"] = int(thunderstroke)
+        return self
+
+    def set_humidity(self, humidity: str):
+        self._data["humidity"] = float(humidity)
+        return self
+
+    def set_sky_status(self, sky_status: str):
+        if "sky_status" not in self._data:
+            self._data["sky_status"] = DatagoSkyStatus(int(sky_status))
+        return self
+
+    def set_rain_type(self, rain_type: str):
+        self._data["rain_type"] = DatagoWeatherRainType(int(rain_type))
+        return self
+
+    def set_temperature(self, temperature: str):
+        self._data["temperature"] = float(temperature)
+        return self
+
+    def set_wind_direction(self, wind_direction: str):
+        self._data["wind_direction"] = float(wind_direction)
+        return self
+
+    def set_wind_speed(self, wind_speed: str):
+        self._data["wind_speed"] = float(wind_speed)
+        return self
+
+    def build(self) -> DatagoShortTermWeatherParsed:
+        return DatagoShortTermWeatherParsed(**self._data)

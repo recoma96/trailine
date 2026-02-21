@@ -27,16 +27,6 @@ async def get_weather_current(
         alias="isMountain",
         description="산악지형 기준 날씨조회를 할 때 사용"
     ),
-    target_dt_str: Optional[str] = Query(
-        None,
-        alias="datetime",
-        description="날짜 (YYYY-MM-DD HH). 미입력 시 현재 시각 기준.",
-        pattern=r"^\d{4}-\d{2}-\d{2} \d{2}$"
-    ),
 ):
-    if target_dt_str is None:
-        target_dt_str = datetime.now().strftime("%Y-%m-%d %H")
-    target_dt = datetime.strptime(target_dt_str, "%Y-%m-%d %H")
-
-    weathers = await weather_service.get_weather_current(lat, lon, target_dt, is_mountain)
+    weathers = await weather_service.get_weather_current(lat, lon, datetime.now(), is_mountain)
     return CurrentWeatherResponse(weathers=weathers)

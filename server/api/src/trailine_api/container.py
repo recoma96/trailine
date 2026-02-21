@@ -3,6 +3,7 @@ from dependency_injector import containers
 from dependency_injector.providers import Factory, Resource
 
 from trailine_api.integrations.external_api import ExternalAPIClient
+from trailine_api.integrations.weather.datago import DataGoWeather
 from trailine_api.integrations.weather.interface import IWeatherProvider
 from trailine_api.integrations.weather.kma_mountain import KmaMountainWeather
 from trailine_api.repositories.course_repositories import (
@@ -38,6 +39,12 @@ class Container(containers.DeclarativeContainer):
         base_url=Settings.KMA_API_URL,
         params={"authKey": Settings.KMA_API_AUTH_KEY},
     )
+    datago_api: Factory[ExternalAPIClient] = Resource(
+        ExternalAPIClient,
+        client=http_client,
+        base_url=Settings.DATAGO_API_URL,
+        params={"serviceKey": Settings.DATAGO_SERVICE_KEY}
+    )
 
     # Repository
     course_repository: Factory[ICourseRepository] = Factory(CourseRepository)
@@ -52,6 +59,10 @@ class Container(containers.DeclarativeContainer):
         client=kma_api,
         weather_repository=weather_repository,
     )
+    village_weather_api: Factory[IWeatherProvider] = Factory(
+        DataGoWeather,
+        client=datago_api,
+    )
 
     # Service
     course_service: Factory[ICourseService] = Factory(
@@ -64,4 +75,5 @@ class Container(containers.DeclarativeContainer):
     weather_service: Factory[IWeatherService] = Factory(
         WeatherService,
         mountain_weather_provider=mountain_weather_api,
+        village_weather_provider=village_weather_api,
     )

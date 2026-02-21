@@ -3,7 +3,6 @@ from typing import List
 from datetime import datetime
 
 from trailine_api.integrations.external_api import ExternalAPIClient
-from trailine_api.integrations.weather.schemas import KmaMountainWeatherItemParsed
 
 
 class IWeatherProvider(metaclass=ABCMeta):
@@ -14,5 +13,5 @@ class IWeatherProvider(metaclass=ABCMeta):
 
     @abstractmethod
     async def forecast_current(
-            self, lat: float, lon: float, target_dt: datetime)  -> List[KmaMountainWeatherItemParsed]:
+            self, lat: float, lon: float, target_dt: datetime)  -> List:
         pass

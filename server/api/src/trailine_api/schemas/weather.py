@@ -4,7 +4,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from trailine_api.integrations.weather.schemas import KmaMountainSkyStatus
+from trailine_api.integrations.weather.schemas import KmaMountainSkyStatus, DatagoSkyStatus, DatagoWeatherRainType
 
 
 class SkyStatusType(str, Enum):
@@ -23,6 +23,29 @@ class SkyStatusType(str, Enum):
             KmaMountainSkyStatus.OVERCAST: SkyStatusType.OVERCAST,
             KmaMountainSkyStatus.RAINY: SkyStatusType.RAINY,
             KmaMountainSkyStatus.SNOWY: SkyStatusType.SNOWY,
+        }.get(sky_status)
+
+    @staticmethod
+    def get_from_datago(sky_status: DatagoSkyStatus, rain_type: DatagoWeatherRainType):
+        if rain_type in (
+            DatagoWeatherRainType.RAINDROP,
+            DatagoWeatherRainType.WEEK_RAINY,
+            DatagoWeatherRainType.SHOWER,
+        ):
+            return SkyStatusType.RAINY
+
+        if rain_type in (
+            DatagoWeatherRainType.SNOWY_AND_RAINY,
+            DatagoWeatherRainType.SNOWY,
+            DatagoWeatherRainType.RAINDROPS_SNOW_FLURRY,
+            DatagoWeatherRainType.SNOW_FLURRY,
+        ):
+            return SkyStatusType.SNOWY
+
+        return {
+            DatagoSkyStatus.SUNNY: SkyStatusType.SUNNY,
+            DatagoSkyStatus.MOSTLY_CLOUDY: SkyStatusType.MOSTLY_CLOUDY,
+            DatagoSkyStatus.OVERCAST: SkyStatusType.OVERCAST,
         }.get(sky_status)
 
 
