@@ -2,6 +2,7 @@ import httpx
 from dependency_injector import containers
 from dependency_injector.providers import Factory, Resource
 
+from trailine_api.common.cache import RedisCache
 from trailine_api.integrations.external_api import ExternalAPIClient
 from trailine_api.integrations.weather.datago import DataGoWeather
 from trailine_api.integrations.weather.interface import IWeatherProvider
@@ -46,6 +47,9 @@ class Container(containers.DeclarativeContainer):
         params={"serviceKey": Settings.DATAGO_SERVICE_KEY}
     )
 
+    # Cache
+    cache_client: RedisCache = Factory(RedisCache)
+
     # Repository
     course_repository: Factory[ICourseRepository] = Factory(CourseRepository)
     course_difficulty_repository: Factory[ICourseDifficultyRepository] = Factory(CourseDifficultyRepository)
@@ -76,4 +80,6 @@ class Container(containers.DeclarativeContainer):
         WeatherService,
         mountain_weather_provider=mountain_weather_api,
         village_weather_provider=village_weather_api,
+        weather_repository=weather_repository,
+        cache_client=cache_client,
     )
