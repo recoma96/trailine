@@ -76,6 +76,9 @@ class RedisCache:
             return None
         return json.loads(raw)
 
+    def build_lock_key(self, key: str) -> str:
+        return f"lock:{key}"
+
     async def acquire_lock(self, key: str, ttl_seconds: int = 30) -> str | None:
         token = uuid4().hex
         ok = await self.get_client().set(key, token, ex=ttl_seconds, nx=True)
