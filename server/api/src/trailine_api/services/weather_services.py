@@ -5,6 +5,7 @@ import asyncio
 import logging
 
 from trailine_api.common.cache import RedisCache
+from trailine_api.common.exc import MountainAreaNotFound
 from trailine_api.common.db import session_scope
 from trailine_api.integrations.weather.interface import IWeatherProvider
 from trailine_api.integrations.weather.schemas import (
@@ -53,7 +54,7 @@ class WeatherService(IWeatherService):
 
             # 원래는 데이터가 있음을 보장하지만, 혹시 어떻게 될지 모르니 예외처리
             if mountain_num is None:
-                raise ValueError("mountain_num is None")
+                raise MountainAreaNotFound()
 
             # 캐싱여부 확인
             cache_key = self._build_mountain_cache_key(mountain_num, target_dt)

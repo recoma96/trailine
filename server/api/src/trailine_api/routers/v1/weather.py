@@ -15,7 +15,20 @@ router = APIRouter()
     "/current",
     status_code=status.HTTP_200_OK,
     summary="실시간 날씨 조회 (0시간 ~ 3시간)",
-    response_model=CurrentWeatherResponse
+    response_model=CurrentWeatherResponse,
+    responses={
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "description": "주변 산악 지형을 찾을 수 없음",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "errorCode": "MOUNTAIN-AREA-NOT-FOUND",
+                        "message": "주변 산악 지형을 찾을수 없어요",
+                    }
+                }
+            },
+        },
+    },
 )
 @inject
 async def get_weather_current(
