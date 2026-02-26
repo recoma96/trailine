@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Callable, Optional
+from typing import Dict, Any, List, Callable, Optional, cast
 
 from trailine_api.common.db import session_scope
 from trailine_api.integrations.external_api import ExternalAPIClient, ExternalApiResponse
@@ -50,8 +50,19 @@ class KmaMountainWeather(IWeatherProvider):
             # 외부 API 실패 시, Retry 관련 로직 필요
             return []
 
+        if not isinstance(response.data, list):
+            return []
+
         # 파싱해서 추출
-        return self._parse_short_term_forecast_data(response.data, target_dt)
+        result = self._parse_short_term_forecast_data(
+            cast(List[KmaMountainWeatherApiResponseItem], response.data),
+            target_dt
+        )
+
+        if not isinstance(result, List):
+            return []
+
+        return result
 
     def _build_forecast_curent_request_params(self, mountain_num: int, target_dt: datetime) -> Dict[str, Any]:
         announcement_dt = get_latest_kma_announcement_dt(target_dt)

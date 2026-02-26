@@ -98,19 +98,19 @@ class ExternalAPIClient:
         try:
             # 리스트 응답인 경우 각 요소를 검증 및 변환
             if isinstance(response_data, list):
-                parsed_data = [success_model.model_validate(item) for item in response_data]
+                parsed_data_list = [success_model.model_validate(item) for item in response_data]
                 return ExternalApiResponse(
                     status_code=status_code, 
-                    data=parsed_data,
+                    data=parsed_data_list,
                     raw_body=response_data
                 )
             
             # 딕셔너리 응답인 경우 단일 객체 검증
             if isinstance(response_data, dict):
-                parsed_data = success_model.model_validate(response_data)
+                parsed_data_dict = success_model.model_validate(response_data)
                 return ExternalApiResponse(
                     status_code=status_code, 
-                    data=parsed_data,
+                    data=parsed_data_dict,
                     raw_body=response_data
                 )
         except ValidationError as e:

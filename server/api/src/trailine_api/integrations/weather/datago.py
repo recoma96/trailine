@@ -29,8 +29,12 @@ class DataGoWeather(IWeatherProvider):
         if self._has_error_in_response(response):
             return []
 
-        response_data: DatagoShortTermWeatherApiResponse = response.data
+        response_data = response.data
+
         if response_data is None:
+            return []
+
+        if not isinstance(response_data, DatagoShortTermWeatherApiResponse):
             return []
 
         return self._parse_short_term_forecast_data(response_data.response.body.items.item, target_dt)
@@ -48,7 +52,11 @@ class DataGoWeather(IWeatherProvider):
     def _has_error_in_response(self, response: ExternalApiResponse) -> bool:
         if not response.is_success:
             return True
-        data: DatagoShortTermWeatherApiResponse = response.data
+
+        data = response.data
+        if not isinstance(data, DatagoShortTermWeatherApiResponse):
+            return True
+
         return data.response.header.result_code != "00"
 
     def _parse_short_term_forecast_data(

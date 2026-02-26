@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 import asyncio
 import logging
 
@@ -60,7 +60,7 @@ class WeatherService(IWeatherService):
             cache_key = self._build_mountain_cache_key(mountain_num, target_dt)
             lock_key = self.cache_client.build_lock_key(cache_key)
             cached_weather = await self.cache_client.get_json(cache_key)
-            if cached_weather is not None:
+            if cached_weather is not None and isinstance(cached_weather, List):
                 return self._deserialize_current_weather_list(cached_weather)
 
             # 백그라운드(비동기)로 산악지형 데이터 캐싱
@@ -79,7 +79,7 @@ class WeatherService(IWeatherService):
             nx, ny = latlon_to_kma_grid(lat, lon)
             cache_key = self._build_village_cache_key(nx, ny, target_dt)
             cached_weather = await self.cache_client.get_json(cache_key)
-            if cached_weather is not None:
+            if cached_weather is not None and isinstance(cached_weather, List):
                 return self._deserialize_current_weather_list(cached_weather)
 
             # 비산악지형 날씨 가져오기
@@ -145,7 +145,7 @@ class WeatherService(IWeatherService):
                 precip_amount=weather_data.precipitation_amount,
                 wind_speed=weather_data.wind_speed,
                 wind_dir=weather_data.wind_direction,
-                snow_depth=weather_data.precipitation_amount if self._check_is_snowy_in_datago(weather_data.rain_type) else 0,
+                snow_depth=int(weather_data.precipitation_amount) if self._check_is_snowy_in_datago(weather_data.rain_type) else 0,
                 sky_status=SkyStatusType.get_from_datago(weather_data.sky_status, weather_data.rain_type),
                 humidity=weather_data.humidity,
             )
@@ -173,8 +173,8 @@ class WeatherService(IWeatherService):
             for weather_data in weather_datas
         ]
 
-    def _serialize_current_weather_list(self, weathers: List[CurrentWeather]) -> list[dict]:
+    def _serialize_current_weather_list(self, weathers: List[CurrentWeather]) -> List[Dict]:
         return [weather.model_dump(mode="json") for weather in weathers]
 
-    def _deserialize_current_weather_list(self, payload: list[dict]) -> List[CurrentWeather]:
+    def _deserialize_current_weather_list(self, payload: List[Dict]) -> List[CurrentWeather]:
         return [CurrentWeather.model_validate(item) for item in payload]

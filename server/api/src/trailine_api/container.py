@@ -31,16 +31,16 @@ class Container(containers.DeclarativeContainer):
     )
 
     # http request client
-    http_client: httpx.AsyncClient = Resource(httpx.AsyncClient, timeout=30.0)
+    http_client: Resource[httpx.AsyncClient] = Resource(httpx.AsyncClient, timeout=30.0)
 
     # External Open APIs
-    kma_api: Factory[ExternalAPIClient] = Resource( # 기상청 API
+    kma_api: Resource[ExternalAPIClient] = Resource( # 기상청 API
         ExternalAPIClient,
         client=http_client,
         base_url=Settings.KMA_API_URL,
         params={"authKey": Settings.KMA_API_AUTH_KEY},
     )
-    datago_api: Factory[ExternalAPIClient] = Resource(
+    datago_api: Resource[ExternalAPIClient] = Resource(
         ExternalAPIClient,
         client=http_client,
         base_url=Settings.DATAGO_API_URL,
@@ -48,7 +48,7 @@ class Container(containers.DeclarativeContainer):
     )
 
     # Cache
-    cache_client: RedisCache = Factory(RedisCache)
+    cache_client: Resource[RedisCache] = Resource(RedisCache)
 
     # Repository
     course_repository: Factory[ICourseRepository] = Factory(CourseRepository)

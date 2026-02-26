@@ -9,6 +9,8 @@ from redis.asyncio import Redis
 
 from trailine_api.settings import Settings
 
+from trailine_api.common.async_utils import await_if_needed
+
 _logger = logging.getLogger(__name__)
 
 
@@ -34,7 +36,7 @@ class RedisCache:
         FastAPI startup에서 호출해 Redis 연결을 확인한다.
         """
         client = self.get_client()
-        await client.ping()
+        await await_if_needed(client.ping())
         _logger.info("Redis connected: %s", Settings.REDIS_URL)
         return client
 
@@ -48,19 +50,19 @@ class RedisCache:
             _logger.info("Redis connection closed")
 
     async def get(self, key: str) -> str | None:
-        return await self.get_client().get(key)
+        return await await_if_needed(self.get_client().get(key))
 
     async def set(self, key: str, value: str, ttl_seconds: int | None = None) -> bool:
-        return await self.get_client().set(key, value, ex=ttl_seconds)
+        return await await_if_needed(self.get_client().set(key, value, ex=ttl_seconds))
 
     async def delete(self, *keys: str) -> int:
-        return await self.get_client().delete(*keys)
+        return await await_if_needed(self.get_client().delete(*keys))
 
     async def exists(self, key: str) -> bool:
-        return bool(await self.get_client().exists(key))
+        return bool(await await_if_needed(self.get_client().exists(key)))
 
     async def ttl(self, key: str) -> int:
-        return int(await self.get_client().ttl(key))
+        return int(await await_if_needed(self.get_client().ttl(key)))
 
     async def set_json(
         self,
@@ -81,7 +83,7 @@ class RedisCache:
 
     async def acquire_lock(self, key: str, ttl_seconds: int = 30) -> str | None:
         token = uuid4().hex
-        ok = await self.get_client().set(key, token, ex=ttl_seconds, nx=True)
+        ok = await await_if_needed(self.get_client().set(key, token, ex=ttl_seconds, nx=True))
         if ok:
             return token
         return None
@@ -94,7 +96,7 @@ class RedisCache:
             return 0
         end
         """
-        result = await self.get_client().eval(script, 1, key, token)
+        result = await await_if_needed(self.get_client().eval(script, 1, key, token))
         return result == 1
 
     @asynccontextmanager
