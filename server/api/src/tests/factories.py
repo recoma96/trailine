@@ -14,6 +14,7 @@ from trailine_model.models.course import (
     CourseIntervalImage
 )
 from trailine_model.models.place import Place
+from trailine_model.models.weather import KmaMountainWeatherArea
 
 # Faker 인스턴스를 생성하여 직접 사용합니다.
 fake = Faker()
@@ -121,6 +122,21 @@ class CourseImageFactory(BaseFactory):
     title = factory.Faker("name")
     description = factory.Faker("sentence")
     course_id = factory.LazyFunction(lambda cid: cid)
+
+
+class KmaMountainWeatherAreaFactory(BaseFactory):
+    class Meta:
+        model = KmaMountainWeatherArea
+
+    class Params:
+        latitude = factory.fuzzy.FuzzyFloat(-90.0, 90.0)
+        longitude = factory.fuzzy.FuzzyFloat(-180.0, 180.0)
+
+    code = factory.fuzzy.FuzzyInteger(1, 9999)
+    name = factory.LazyFunction(lambda: fake.user_name()[:16])
+    geom = factory.LazyAttribute(lambda o: f"SRID=4326;POINT({o.longitude} {o.latitude})")
+    geog = factory.LazyAttribute(lambda o: f"SRID=4326;POINT({o.longitude} {o.latitude})")
+    elevation = factory.fuzzy.FuzzyInteger(0, 2000)
 
 
 class CourseFactory(BaseFactory):

@@ -10,3 +10,8 @@ dependencies = []
 members = [
     "api", "admin", "model", "scripts"
 ]
+
+[dependency-groups]
+dev = [
+    "fakeredis>=2.34.1",
+]
