@@ -1,10 +1,13 @@
 from typing import Generator, Any
 
 import pytest
+import fakeredis.aioredis
+from dependency_injector import providers
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from trailine_api.common.cache import RedisCache, cache as global_cache
 from trailine_api.main import app
 from trailine_model.base import engine as dbengine, Base, SessionLocal
 
@@ -41,7 +44,27 @@ def dbsession() -> Generator[Session, Any, None]:
 
 
 @pytest.fixture(scope="function")
-def client(dbsession: Session):
+def fake_redis_cache():
+    fake_client = fakeredis.aioredis.FakeRedis(decode_responses=True)
+    global_cache._client = fake_client
+
+    cache_instance = RedisCache()
+    cache_instance._client = fake_client
+
+    yield cache_instance
+
+    global_cache._client = None
+
+
+@pytest.fixture(scope="function", autouse=True)
+def _override_cache_client(fake_redis_cache):
+    app.container.cache_client.override(providers.Object(fake_redis_cache))
+    yield
+    app.container.cache_client.reset_override()
+
+
+@pytest.fixture(scope="function")
+def client(dbsession: Session, fake_redis_cache: RedisCache):
     with TestClient(app) as c:
         yield c
 
