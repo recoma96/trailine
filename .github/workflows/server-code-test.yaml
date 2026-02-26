@@ -96,6 +96,7 @@ jobs:
         DB_PSWD: ${{ env.POSTGRES_PASSWORD }}
         DB_PORT: 5432
         DB_HOST: localhost
+        RUN_MODE: test
 
     - name: Upload HTML coverage report
       if: ${{ always() && !env.ACT }} # 실패 상관없이 보고서 출력

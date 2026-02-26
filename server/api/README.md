@@ -34,11 +34,6 @@ server/api $ runserver
 
 ### 추가1) 테스트 코드 구동
 
-`.env` 에서 아래 문구 추가
-```dotenv
-IS_TEST=1
-```
-
 ```shell
 server/api $ pytest
 ```
