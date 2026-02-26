@@ -10,3 +10,9 @@ dependencies = []
 members = [
     "api", "admin", "model", "scripts"
 ]
+
+[dependency-groups]
+dev = [
+    "fakeredis>=2.34.1",
+    "pytest-asyncio>=1.3.0",
+]

@@ -2,10 +2,13 @@ import os
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from trailine_api.common.cache import cache
 from trailine_api.common.logger import setup_logging
 from trailine_api.container import Container
+from trailine_api.exception_handler import trailine_exception_handler
 from trailine_api.middlewares.request_logger import RequestLoggingMiddleware
 from trailine_api.routers import router as api_router
+from trailine_api.common.exc import TrailineException
 
 
 def create_app() -> FastAPI:
@@ -21,6 +24,7 @@ def create_app() -> FastAPI:
     )
     app.container = container  # type: ignore[attr-defined]
     app.add_middleware(RequestLoggingMiddleware)
+    app.add_exception_handler(TrailineException, trailine_exception_handler)
 
     app.include_router(api_router, prefix="/api")
 
@@ -45,6 +49,14 @@ def create_app() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
     )
+
+    @app.on_event("startup")
+    async def on_startup() -> None:
+        await cache.init()
+
+    @app.on_event("shutdown")
+    async def on_shutdown() -> None:
+        await cache.close()
 
     return app
 
