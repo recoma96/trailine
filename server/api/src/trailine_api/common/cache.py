@@ -89,6 +89,10 @@ class RedisCache:
         return None
 
     async def release_lock(self, key: str, token: str) -> bool:
+        # 저장된 토큰이 내 토큰과 일치할 때만 해제 (get+del을 원자적으로 수행해 레이스 방지, Lua 코드 사용)
+        if Settings.RUN_MODE == "test":
+            return await self._release_lock_without_eval_for_tests(key, token)
+
         script = """
         if redis.call("get", KEYS[1]) == ARGV[1] then
             return redis.call("del", KEYS[1])
@@ -98,6 +102,16 @@ class RedisCache:
         """
         result = await await_if_needed(self.get_client().eval(script, 1, key, token))
         return result == 1
+
+    async def _release_lock_without_eval_for_tests(self, key: str, token: str) -> bool:
+        """
+        테스트 환경(FakeRedis)에서는 EVAL이 지원되지 않으므로 비원자적으로 해제한다.
+        """
+        current = await self.get(key)
+        if current != token:
+            return False
+        await self.delete(key)
+        return True
 
     @asynccontextmanager
     async def lock(self, key: str, ttl_seconds: int = 30):
