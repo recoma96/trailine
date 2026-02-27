@@ -15,7 +15,7 @@ from trailine_api.settings import Settings
 
 
 class DataGoWeather(IWeatherProvider):
-    async def forecast_current(
+    async def get_current_weather(
             self, lat: float, lon: float, target_dt: datetime) -> List:
 
         nx, ny = latlon_to_kma_grid(lat, lon)

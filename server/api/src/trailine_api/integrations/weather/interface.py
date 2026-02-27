@@ -12,6 +12,6 @@ class IWeatherProvider(metaclass=ABCMeta):
         self.client = client
 
     @abstractmethod
-    async def forecast_current(
+    async def get_current_weather(
             self, lat: float, lon: float, target_dt: datetime)  -> List:
         pass

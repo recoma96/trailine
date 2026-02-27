@@ -25,7 +25,7 @@ class KmaMountainWeather(IWeatherProvider):
         super().__init__(client)
         self.weather_repository = weather_repository
 
-    async def forecast_current(
+    async def get_current_weather(
             self, lat: float, lon: float, target_dt: datetime
     ) -> List[KmaMountainWeatherItemParsed]:
         """

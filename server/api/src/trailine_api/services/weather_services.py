@@ -72,7 +72,7 @@ class WeatherService(IWeatherService):
                 )
 
             # 비산악지형 날씨 가져오기
-            weather_datas = await self.village_weather_provider.forecast_current(lat, lon, target_dt)
+            weather_datas = await self.village_weather_provider.get_current_weather(lat, lon, target_dt)
             return self._build_current_weather_from_village(weather_datas, target_dt)
         else:
             # 비산악지형 캐싱 여부 확인
@@ -83,7 +83,7 @@ class WeatherService(IWeatherService):
                 return self._deserialize_current_weather_list(cached_weather)
 
             # 비산악지형 날씨 가져오기
-            weather_datas = await self.village_weather_provider.forecast_current(lat, lon, target_dt)
+            weather_datas = await self.village_weather_provider.get_current_weather(lat, lon, target_dt)
             weathers = self._build_current_weather_from_village(weather_datas, target_dt)
             payload = self._serialize_current_weather_list(weathers)
             await self.cache_client.set_json(cache_key, payload, ttl_seconds=3600)
@@ -111,7 +111,7 @@ class WeatherService(IWeatherService):
         산악지형에 대한 현재 날씨 정보 캐싱
         """
         try:
-            weather_datas = await self.mountain_weather_provider.forecast_current(lat, lon, target_dt)
+            weather_datas = await self.mountain_weather_provider.get_current_weather(lat, lon, target_dt)
             weathers = self._build_current_weather_from_mountain(weather_datas, target_dt)
             payload = self._serialize_current_weather_list(weathers)
             await self.cache_client.set_json(cache_key, payload, ttl_seconds=3600)
