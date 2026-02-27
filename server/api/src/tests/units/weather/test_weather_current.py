@@ -46,9 +46,9 @@ def deps(monkeypatch) -> _Deps:
 
     weather_repository = Mock()
     mountain_weather_provider = Mock()
-    mountain_weather_provider.forecast_current = AsyncMock()
+    mountain_weather_provider.get_current_weather = AsyncMock()
     village_weather_provider = Mock()
-    village_weather_provider.forecast_current = AsyncMock()
+    village_weather_provider.get_current_weather = AsyncMock()
 
     service = WeatherService(
         mountain_weather_provider=mountain_weather_provider,
@@ -125,8 +125,8 @@ async def test_get_weather_current_mountain_cache_hit_returns(deps: _Deps):
     result = await deps.service.get_weather_current(37.5, 127.0, datetime.now(), True)
 
     assert len(result) == 1
-    deps.village_weather_provider.forecast_current.assert_not_called()
-    deps.mountain_weather_provider.forecast_current.assert_not_called()
+    deps.village_weather_provider.get_current_weather.assert_not_called()
+    deps.mountain_weather_provider.get_current_weather.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -134,7 +134,7 @@ async def test_get_weather_current_mountain_cache_miss_lock_acquired_creates_tas
     deps.weather_repository.get_nearest_mountain_area_code.return_value = 1001
     deps.cache_client.get_json.return_value = None
     deps.cache_client.acquire_lock.return_value = "token"
-    deps.village_weather_provider.forecast_current.return_value = [_build_datago_weather(datetime.now())]
+    deps.village_weather_provider.get_current_weather.return_value = [_build_datago_weather(datetime.now())]
 
     create_task_mock = Mock()
     monkeypatch.setattr(weather_services.asyncio, "create_task", create_task_mock)
@@ -149,7 +149,7 @@ async def test_get_weather_current_mountain_cache_miss_lock_failed_no_task(deps:
     deps.weather_repository.get_nearest_mountain_area_code.return_value = 1001
     deps.cache_client.get_json.return_value = None
     deps.cache_client.acquire_lock.return_value = None
-    deps.village_weather_provider.forecast_current.return_value = [_build_datago_weather(datetime.now())]
+    deps.village_weather_provider.get_current_weather.return_value = [_build_datago_weather(datetime.now())]
 
     create_task_mock = Mock()
     monkeypatch.setattr(weather_services.asyncio, "create_task", create_task_mock)
@@ -161,7 +161,7 @@ async def test_get_weather_current_mountain_cache_miss_lock_failed_no_task(deps:
 
 @pytest.mark.asyncio
 async def test_refresh_mountain_cache_success_sets_cache(deps: _Deps):
-    deps.mountain_weather_provider.forecast_current.return_value = [
+    deps.mountain_weather_provider.get_current_weather.return_value = [
         _build_mountain_weather(datetime.now())
     ]
 
@@ -180,7 +180,7 @@ async def test_refresh_mountain_cache_success_sets_cache(deps: _Deps):
 
 @pytest.mark.asyncio
 async def test_refresh_mountain_cache_failure_releases_lock(deps: _Deps):
-    deps.mountain_weather_provider.forecast_current.side_effect = RuntimeError("boom")
+    deps.mountain_weather_provider.get_current_weather.side_effect = RuntimeError("boom")
 
     await deps.service._refresh_mountain_cache(
         37.5,

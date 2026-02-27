@@ -11,7 +11,7 @@ from trailine_api.integrations.weather.schemas import (
 
 
 class FakeMountainWeatherProvider:
-    async def forecast_current(self, lat: float, lon: float, target_dt: datetime):
+    async def get_current_weather(self, lat: float, lon: float, target_dt: datetime):
         return [
             KmaMountainWeatherItemParsed(
                 forecast_at=target_dt,
@@ -29,7 +29,7 @@ class FakeMountainWeatherProvider:
 
 
 class FakeVillageWeatherProvider:
-    async def forecast_current(self, lat: float, lon: float, target_dt: datetime):
+    async def get_current_weather(self, lat: float, lon: float, target_dt: datetime):
         return [
             DatagoShortTermWeatherParsed(
                 forecast_at=target_dt,
