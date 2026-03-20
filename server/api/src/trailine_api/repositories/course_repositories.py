@@ -1,10 +1,13 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Sequence, List, Tuple
 
+from geoalchemy2.functions import ST_MakeLine, ST_StartPoint, ST_EndPoint, ST_LineInterpolatePoint
+from geoalchemy2.shape import to_shape
 from sqlalchemy import select, or_, func, cast, Integer, values, literal, literal_column
+from sqlalchemy.dialects.postgresql import aggregate_order_by
 from sqlalchemy.orm import Session, aliased
 from sqlalchemy.orm import selectinload
-from trailine_api.common.types import SQLRowList, SQLRow
+from trailine_api.common.types import SQLRowList, SQLRow, CourseLocationType
 from trailine_model.models.place import Place
 from trailine_model.models.course import (
     Course,
@@ -30,6 +33,10 @@ class ICourseStyleRepository(metaclass=ABCMeta):
 
 
 class ICourseRepository(metaclass=ABCMeta):
+    @abstractmethod
+    def get_course_location(self, session: Session, course_id: int, location_type: CourseLocationType) -> Optional[Tuple[float, float]]:
+        pass
+
     @abstractmethod
     def get_course_ids_by_search(
             self,
@@ -88,6 +95,53 @@ class CourseStyleRepository(ICourseStyleRepository):
 
 
 class CourseRepository(ICourseRepository):
+    def get_course_location(self, session: Session, course_id: int, location_type: CourseLocationType) -> Optional[Tuple[float, float]]:
+        """RAW Query
+        WITH merged AS (
+            SELECT
+                ST_MakeLine(ci.geom ORDER BY cci.position) AS geom
+            FROM course_interval ci
+            JOIN course_course_interval cci ON cci.interval_id = ci.id
+            WHERE cci.course_id = :course_id
+        )
+        SELECT
+            ST_StartPoint(geom) AS start_point,
+            ST_LineInterpolatePoint(geom, 0.5) AS middle_point,
+            ST_EndPoint(geom) AS end_point
+        FROM merged;
+        """
+
+        # CTE: ST_MakeLine으로 구간들을 position 순서대로 하나의 라인으로 병합
+        merged = (
+            select(
+                ST_MakeLine(
+                    aggregate_order_by(CourseInterval.geom, CourseCourseInterval.position.asc()),
+                    type_=CourseInterval.geom.type
+                ).label("geom")
+            )
+            .join(CourseCourseInterval, CourseCourseInterval.interval_id == CourseInterval.id)
+            .where(CourseCourseInterval.course_id == course_id)
+            .cte("merged")
+        )
+
+        # location_type에 따라 적절한 포인트 함수 선택
+        point_func_map = {
+            CourseLocationType.START: ST_StartPoint(merged.c.geom),
+            CourseLocationType.MIDDLE: ST_LineInterpolatePoint(merged.c.geom, 0.5),
+            CourseLocationType.END: ST_EndPoint(merged.c.geom),
+        }
+
+        point_expr = point_func_map[location_type]
+
+        stmt = select(point_expr.label("geom"))
+
+        geom = session.execute(stmt).scalar()
+        if geom is None:
+            return None
+
+        point = to_shape(geom)
+        return point.y, point.x
+
     def get_course_ids_by_search(
             self,
             session: Session,
