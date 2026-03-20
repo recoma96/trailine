@@ -1,9 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Sequence, List, Tuple
 
-from geoalchemy2.functions import ST_MakeLine, ST_StartPoint, ST_EndPoint, ST_LineInterpolatePoint
+from geoalchemy2.functions import ST_MakeLine, ST_StartPoint, ST_EndPoint, ST_LineInterpolatePoint, ST_Reverse
 from geoalchemy2.shape import to_shape
-from sqlalchemy import select, or_, func, cast, Integer, values, literal, literal_column
+from sqlalchemy import select, or_, func, cast, case, Integer, values, literal, literal_column
 from sqlalchemy.dialects.postgresql import aggregate_order_by
 from sqlalchemy.orm import Session, aliased
 from sqlalchemy.orm import selectinload
@@ -111,11 +111,17 @@ class CourseRepository(ICourseRepository):
         FROM merged;
         """
 
+        # is_reversed가 True이면 geom을 뒤집고, False이면 그대로 사용
+        oriented_geom = case(
+            (CourseCourseInterval.is_reversed.is_(True), ST_Reverse(CourseInterval.geom)),
+            else_=CourseInterval.geom
+        )
+
         # CTE: ST_MakeLine으로 구간들을 position 순서대로 하나의 라인으로 병합
         merged = (
             select(
                 ST_MakeLine(
-                    aggregate_order_by(CourseInterval.geom, CourseCourseInterval.position.asc()),
+                    aggregate_order_by(oriented_geom, CourseCourseInterval.position.asc()),
                     type_=CourseInterval.geom.type
                 ).label("geom")
             )
