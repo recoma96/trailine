@@ -6,6 +6,7 @@ from sqlalchemy import Integer, String, SmallInteger, Text, ForeignKey, CheckCon
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from trailine_model.base import Base, TimeStampModel
+from trailine_model.models.forecast import KmaMidLandStatusArea
 from trailine_model.models.place import Place
 
 
@@ -111,6 +112,9 @@ class Course(Base, TimeStampModel):
 
     course_difficulty_id: Mapped[int] = mapped_column(ForeignKey("course_difficulty.id"), nullable=False)
     course_style_id: Mapped[int] = mapped_column(ForeignKey("course_style.id"), nullable=False)
+
+    kma_mid_land_status_area_id: Mapped[int] = mapped_column(ForeignKey("kma_mid_land_status_area.id", ondelete="SET NULL"), nullable=True)
+    kma_mid_land_temp_area_id: Mapped[int] = mapped_column(ForeignKey("kma_mid_land_temp_area.id", ondelete="SET NULL"), nullable=True)
 
     course_difficulty: Mapped[CourseDifficulty] = relationship(foreign_keys=[course_difficulty_id])
     course_style: Mapped[CourseStyle] = relationship(foreign_keys=[course_style_id])
