@@ -14,8 +14,9 @@ from trailine_api.schemas.course import (
     CourseDifficultySchema,
     CourseStyleSchema
 )
+from trailine_api.schemas.weather import WeatherForecastResponseSchema
 from trailine_api.services.course_services import ICourseService
-
+from trailine_api.services.weather_services import IWeatherService
 
 router = APIRouter()
 
@@ -129,4 +130,24 @@ async def get_course_intervals(
     return GettingCourseIntervalResponseSchema(
         intervalCount=len(intervals),
         intervals=intervals,
+    )
+
+
+@router.get(
+    "/{course_id}/weather/forecast",
+    status_code=status.HTTP_200_OK,
+    summary="코스 위치 일기예보 조회",
+    response_model=WeatherForecastResponseSchema,
+)
+@inject
+async def get_course_weather_forecast(
+    weather_service: Annotated[IWeatherService, Depends(Provide[Container.weather_service])],
+    course_id: int = Path(..., description="코스 고유 아이디"),
+    days: int = Query(3, ge=1, le=10, description="조회할 일기예보 일수 (최대 10일)"),
+):
+    forecasts = await weather_service.get_forecasts(course_id, days)
+
+    return WeatherForecastResponseSchema(
+        courseId=course_id,
+        forecasts=forecasts,
     )

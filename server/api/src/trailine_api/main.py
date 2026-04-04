@@ -11,7 +11,7 @@ from trailine_api.routers import router as api_router
 def create_app() -> FastAPI:
     container = Container()
 
-    setup_logging(level="INFO")
+    # setup_logging(level="INFO")
 
     app = FastAPI(
         title="trailine_api",

@@ -19,3 +19,25 @@ class KmaMountainForecastArea(Base, TimeStampModel):
     geog: Mapped[Any] = mapped_column(Geometry(geometry_type="POINT", srid=4326), nullable=False,
                                       comment="위경도(거리, 버퍼 연산)")
     elevation: Mapped[int] = mapped_column(Integer, nullable=False, comment="해발고도 (m)")
+
+
+class KmaMidLandStatusArea(Base):
+    __tablename__ = "kma_mid_land_status_area"
+    __table_args__ = {
+        "comment": "기상청 중기육상예보 날씨 지역코드",
+    }
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(8), nullable=False, unique=True)
+    area: Mapped[str] = mapped_column(String(16), nullable=False)
+
+
+class KmaMidLandTempArea(Base):
+    __tablename__ = "kma_mid_land_temp_area"
+    __table_args__ = {
+        "comment": "기상청 중기육상예보 온도 지역코드"
+    }
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(8), nullable=False, unique=True)
+    area: Mapped[str] = mapped_column(String(16), nullable=False)
