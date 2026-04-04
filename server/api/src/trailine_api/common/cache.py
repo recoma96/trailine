@@ -90,7 +90,7 @@ class RedisCache:
 
     async def release_lock(self, key: str, token: str) -> bool:
         # 저장된 토큰이 내 토큰과 일치할 때만 해제 (get+del을 원자적으로 수행해 레이스 방지, Lua 코드 사용)
-        if Settings.RUN_MODE == "test":
+        if Config.RUN_MODE == "test":
             return await self._release_lock_without_eval_for_tests(key, token)
 
         script = """
