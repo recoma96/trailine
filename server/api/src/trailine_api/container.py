@@ -27,15 +27,15 @@ class Container(containers.DeclarativeContainer):
     )
 
     # External
-    kma_mid_forecast_api: Factory[IKmaMidLandForecastAPI] = Singleton(
+    kma_mid_forecast_api: Singleton[IKmaMidLandForecastAPI] = Singleton(
         KmaMidLandForecastAPI,
         service_key=Config.DATAGO_SERVICE_KEY
     )
-    kma_mid_temperature_api: Factory[IKmaMidLandTemperatureAPI] = Singleton(
+    kma_mid_temperature_api: Singleton[IKmaMidLandTemperatureAPI] = Singleton(
         KmaMidLandTemperatureAPI,
         service_key=Config.DATAGO_SERVICE_KEY
     )
-    kma_short_forecast_api: Factory[IKmaShortForecastAPI] = Singleton(
+    kma_short_forecast_api: Singleton[IKmaShortForecastAPI] = Singleton(
         KmaShortForecastAPI,
         service_key=Config.DATAGO_SERVICE_KEY
     )

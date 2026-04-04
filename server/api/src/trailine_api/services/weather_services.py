@@ -58,7 +58,7 @@ class WeatherService(IWeatherService):
         # 캐싱된 데이터 가져오기
         cache_key = f"weather:course:{course_id}:{days}"
         cached = await self._cache.get_json(cache_key)
-        if cached is not None:
+        if isinstance(cached, list):
             return [WeatherForecastItemSchema(**item) for item in cached]
 
         # 캐싱된 데이터 없으면 직접 조회
@@ -101,9 +101,13 @@ class WeatherService(IWeatherService):
                     detail="날씨 정보를 찾을 수 없어요."
                 )
 
-            nx, ny = latlon_to_grid(
-                *self._course_repository.get_course_location(session, course_id, CourseLocationType.MIDDLE),
-            )
+            location = self._course_repository.get_course_location(session, course_id, CourseLocationType.MIDDLE)
+            if location is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="코스 위치 정보를 찾을 수 없어요."
+                )
+            nx, ny = latlon_to_grid(*location)
 
         return kma_mid_status_code, kma_mid_temp_code, nx, ny
 

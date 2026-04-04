@@ -14,6 +14,9 @@ class SkyCondition(StrEnum):
 
 
 class DatagoMiddleForecastSkyCondition(StrEnum):
+    korean: str
+    sky_condition: SkyCondition
+
     def __new__(cls, value: str, korean: str = "", sky_condition: SkyCondition = SkyCondition.CLEAR):
         obj = str.__new__(cls, value)
         obj._value_ = value
@@ -45,6 +48,9 @@ class DatagoMiddleForecastSkyCondition(StrEnum):
 
 
 class DatagoShortForecastRainCondition(StrEnum):
+    code: int
+    sky_condition: SkyCondition
+
     def __new__(cls, value: str, code: int = 0, sky_condition: SkyCondition = SkyCondition.CLEAR):
         obj = str.__new__(cls, value)
         obj._value_ = value
@@ -70,6 +76,9 @@ class DatagoShortForecastRainCondition(StrEnum):
 
 
 class DatagoShortForecastSkyCondition(StrEnum):
+    code: int
+    sky_condition: SkyCondition
+
     def __new__(cls, value: str, code: int = 0, sky_condition: SkyCondition = SkyCondition.CLEAR):
         obj = str.__new__(cls, value)
         obj._value_ = value

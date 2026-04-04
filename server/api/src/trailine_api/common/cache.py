@@ -23,6 +23,8 @@ class RedisCache:
         Redis 클라이언트를 Lazy-init로 생성해 반환한다.
         """
         if self._client is None:
+            if Config.REDIS_URL is None:
+                raise RuntimeError("Config.REDIS_URL is not set")
             self._client = redis.from_url(
                 Config.REDIS_URL,
                 encoding="utf-8",
