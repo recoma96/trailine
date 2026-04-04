@@ -1,17 +1,18 @@
 from abc import ABCMeta, abstractmethod
-from typing import List, Tuple
+from typing import List, Tuple, Dict
+from collections import defaultdict
 from datetime import datetime, timedelta
 
 from fastapi import HTTPException
 from starlette import status
 
 from trailine_api.common.db import session_scope
-from trailine_api.common.types import CourseLocationType
+from trailine_api.common.types import CourseLocationType, DatagoShortForecastRainCondition, SkyCondition
 from trailine_api.common.utils import latlon_to_grid
-from trailine_api.externals.datago import IKmaMidLandForecastAPI, IKmaMidLandTemperatureAPI
+from trailine_api.externals.datago import IKmaMidLandForecastAPI, IKmaMidLandTemperatureAPI, IKmaShortForecastAPI
 from trailine_api.repositories.course_repositories import ICourseRepository
 from trailine_api.repositories.weather_repositories import IWeatherRepository
-from trailine_api.schemas.weather import WeatherForecastItemSchema
+from trailine_api.schemas.weather import ShortForecastItem, WeatherForecastItemSchema
 
 
 MID_FORECAST_MIN_DAY = 5  # 기상청 중기예보 시작일 (5일 후부터)
@@ -23,18 +24,21 @@ class IWeatherService(metaclass=ABCMeta):
     _weather_repository: IWeatherRepository
     _kma_mid_forecast_api: IKmaMidLandForecastAPI
     _kma_mid_temperature_api: IKmaMidLandTemperatureAPI
+    _kma_short_forecast_api: IKmaShortForecastAPI
 
     def __init__(
             self,
             course_repository: ICourseRepository,
             weather_repository: IWeatherRepository,
             kma_mid_forecast_api: IKmaMidLandForecastAPI,
-            kma_mid_temperature_api: IKmaMidLandTemperatureAPI
+            kma_mid_temperature_api: IKmaMidLandTemperatureAPI,
+            kma_short_forecast_api: IKmaShortForecastAPI
     ):
         self._course_repository = course_repository
         self._weather_repository = weather_repository
         self._kma_mid_forecast_api = kma_mid_forecast_api
         self._kma_mid_temperature_api = kma_mid_temperature_api
+        self._kma_short_forecast_api = kma_short_forecast_api
 
     @abstractmethod
     def get_forecasts(self, course_id: int, days: int) -> List[WeatherForecastItemSchema]:
@@ -50,9 +54,10 @@ class WeatherService(IWeatherService):
 
         results: List[WeatherForecastItemSchema] = []
 
-        # days <= 4: 기상청 단기예보 활용 (TODO)
+        # days <= 4: 기상청 단기예 활용
+        results.extend(self._build_short_forecasts(nx, ny, days))
 
-        # days >= 5: 중기예보
+        # days >= 5: 중기예보 활용
         if days >= MID_FORECAST_MIN_DAY:
             results.extend(self._build_mid_forecasts(status_code, temp_code, days))
 
@@ -82,6 +87,54 @@ class WeatherService(IWeatherService):
             )
 
         return kma_mid_status_code, kma_mid_temp_code, nx, ny
+
+    _SKY_CONDITION_PRIORITY = {
+        SkyCondition.CLEAR: 0,
+        SkyCondition.CLOUDY: 1,
+        SkyCondition.RAIN: 2,
+        SkyCondition.SNOW: 3,
+    }
+
+    def _build_short_forecasts(self, nx: int, ny: int, days: int) -> List[WeatherForecastItemSchema]:
+        """단기예보 API를 호출하고 응답을 조합한다"""
+        short_forecasts = self._kma_short_forecast_api.call(nx, ny, days)
+
+        daily: Dict[str, List[ShortForecastItem]] = defaultdict(list)
+
+        # 예보 데이터를 날짜별로 그룹핑
+        for item in short_forecasts:
+            date_key = item.forecast_date.strftime(DATE_FORMAT)
+            daily[date_key].append(item)
+
+        results: List[WeatherForecastItemSchema] = []
+        for date_key in sorted(daily):
+            items = daily[date_key]
+
+            results.append(
+                WeatherForecastItemSchema(
+                    date=date_key,
+                    minTemperature=min(item.temperature for item in items),
+                    maxTemperature=max(item.temperature for item in items),
+                    precipitationProbability=max(item.rain_probability for item in items),
+                    skyCondition=self._resolve_daily_sky_condition(items),
+                )
+            )
+
+        return results
+
+    def _resolve_daily_sky_condition(self, items: List[ShortForecastItem]) -> SkyCondition:
+        """시간별 예보에서 하루의 대표 하늘 상태를 결정한다."""
+        worst = SkyCondition.CLEAR
+        for item in items:
+            if item.rain_condition != DatagoShortForecastRainCondition.NONE:
+                condition = item.rain_condition.to_sky_condition()
+            else:
+                condition = item.sky_condition.to_sky_condition()
+
+            if self._SKY_CONDITION_PRIORITY[condition] > self._SKY_CONDITION_PRIORITY[worst]:
+                worst = condition
+
+        return worst
 
     def _build_mid_forecasts(
         self, status_code: str, temp_code: str, days: int

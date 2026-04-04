@@ -1,11 +1,17 @@
 from abc import ABCMeta, abstractmethod
-from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from datetime import datetime, timedelta, date
+from typing import Any, Dict, List, Tuple
+import collections
+import math
 
 import httpx
 
-from trailine_api.common.types import DataGoMiddleForecastSkyCondition
-from trailine_api.schemas.weather import MidLandForecastItem, MidLandTemperatureItem
+from trailine_api.common.types import (
+    DatagoMiddleForecastSkyCondition,
+    DatagoShortForecastRainCondition,
+    DatagoShortForecastSkyCondition
+)
+from trailine_api.schemas.weather import MidLandForecastItem, MidLandTemperatureItem, ShortForecastItem
 
 
 # ──────────────────────────────────────────
@@ -15,7 +21,7 @@ from trailine_api.schemas.weather import MidLandForecastItem, MidLandTemperature
 class DatagoAPI:
     service_key: str
     url: str
-    base_url: str = "http://apis.data.go.kr"
+    base_url: str = "https://apis.data.go.kr"
 
     def __init__(self, service_key: str, uri: str):
         self.service_key = service_key
@@ -92,6 +98,13 @@ class IKmaMidLandTemperatureAPI(metaclass=ABCMeta):
         pass
 
 
+class IKmaShortForecastAPI(metaclass=ABCMeta):
+    """단기 날씨 예보
+    """
+    @abstractmethod
+    def call(self, nx: int, ny: int, days: int) -> List[ShortForecastItem]:
+        pass
+
 # ──────────────────────────────────────────
 # Implementation
 # ──────────────────────────────────────────
@@ -110,12 +123,12 @@ class KmaMidLandForecastAPI(KmaMidForecastBase, IKmaMidLandForecastAPI):
             if day <= 7:
                 rain_am = item[f"rnSt{day}Am"]
                 rain_pm = item[f"rnSt{day}Pm"]
-                sky_am = DataGoMiddleForecastSkyCondition.from_korean(item[f"wf{day}Am"])
-                sky_pm = DataGoMiddleForecastSkyCondition.from_korean(item[f"wf{day}Pm"])
+                sky_am = DatagoMiddleForecastSkyCondition.from_korean(item[f"wf{day}Am"])
+                sky_pm = DatagoMiddleForecastSkyCondition.from_korean(item[f"wf{day}Pm"])
             else:
                 rain_am = item[f"rnSt{day}"]
                 rain_pm = rain_am
-                sky_am = DataGoMiddleForecastSkyCondition.from_korean(item[f"wf{day}"])
+                sky_am = DatagoMiddleForecastSkyCondition.from_korean(item[f"wf{day}"])
                 sky_pm = sky_am
 
             results.append(MidLandForecastItem(
@@ -144,3 +157,136 @@ class KmaMidLandTemperatureAPI(KmaMidForecastBase, IKmaMidLandTemperatureAPI):
                 max_temperature=item[f"taMax{day}"],
             ))
         return results
+
+
+class KmaShortForecastAPI(DatagoAPI, IKmaShortForecastAPI):
+    _BASE_TIMES = ["0200", "0500", "0800", "1100", "1400", "1700", "2000", "2300"]
+
+    def __init__(self, service_key: str):
+        super().__init__(service_key, "/1360000/VilageFcstInfoService_2.0/getVilageFcst")
+
+    def call(self, nx: int, ny: int, days: int) -> List[ShortForecastItem]:
+        if days > 4:
+            days = 4
+
+        today = date.today()
+        base_date, base_time = self._convert_time_to_forecast_time(datetime.now())
+
+        end_date = today + timedelta(days=days)
+        prev_base_date: None | date = None
+        page = 1
+        raw_items: Dict[datetime, Dict[str, Any]] = collections.defaultdict(dict)
+
+        while True:
+            # While문 탈출 여부
+            if (
+                    prev_base_date is not None
+                    and prev_base_date >= end_date
+            ):
+                break
+
+            # API 호출
+            response = httpx.get(self.url, params={
+                "serviceKey": self.service_key,
+                "dataType": "JSON",
+                "numOfRows": 500,
+                "pageNo": page,
+                "base_date": base_date,
+                "base_time": base_time,
+                "nx": nx,
+                "ny": ny,
+            })
+            response.raise_for_status()
+
+            # 데이터 수집
+            items = self._parse_response(response)["item"]
+
+            if len(items) == 0:
+                break
+
+            for item in items:
+                forecast_date, forecast_time = item["fcstDate"], item["fcstTime"]
+                forecast_date_key = datetime.strptime(f"{forecast_date}{forecast_time}", "%Y%m%d%H%M")
+
+                category, value = item["category"], item["fcstValue"]
+                prev_base_date = forecast_date_key.date()
+                if prev_base_date >= end_date:
+                    break
+
+                raw_items[forecast_date_key]["forecast_date"] = forecast_date_key
+
+                if category == "POP":
+                    raw_items[forecast_date_key]["rain_probability"] = int(value)
+                elif category == "PTY":
+                    raw_items[forecast_date_key]["rain_condition"] = DatagoShortForecastRainCondition.from_code(int(value))
+                elif category == "PCP":
+                    raw_items[forecast_date_key]["rain_amount"] = self._parse_precipitation(value)
+                elif category == "REH":
+                    raw_items[forecast_date_key]["humidity"] = int(value)
+                elif category == "SNO":
+                    raw_items[forecast_date_key]["snow_amount"] = self._parse_snow(value)
+                elif category == "SKY":
+                    raw_items[forecast_date_key]["sky_condition"] = DatagoShortForecastSkyCondition.from_code(int(value))
+                elif category == "TMP":
+                    raw_items[forecast_date_key]["temperature"] = int(value)
+                elif category == "TMN":
+                    raw_items[forecast_date_key]["min_temperature"] = math.floor(float(value))
+                elif category == "TMX":
+                    raw_items[forecast_date_key]["max_temperature"] = math.floor(float(value))
+
+            page += 1
+
+        return [
+            ShortForecastItem(**data)
+            for _, data in sorted(raw_items.items())
+        ]
+
+    @staticmethod
+    def _parse_precipitation(value: str) -> float:
+        if value == "강수없음" or value == "0":
+            return 0.0
+        if value == "1mm 미만":
+            return 0.5
+        if value == "50.0mm 이상":
+            return 50.0
+        return float(value[:-2])
+
+    @staticmethod
+    def _parse_snow(value: str) -> float:
+        if value == "적설없음" or value == "0":
+            return 0.0
+        if value == "0.5cm 미만":
+            return 0.5
+        if value == "5.0cm 이상":
+            return 5.0
+        return float(value[:-2])
+
+    @staticmethod
+    def _convert_time_to_forecast_time(_date: datetime) -> Tuple[str, str]:
+        """현재 시각을 단기예보 base_date, base_time으로 변환한다.
+
+        API 제공 시간은 base_time + 10분이므로,
+        해당 시각 이전이면 직전 base_time을 사용한다.
+        00:00~02:10 사이에는 전날 2300을 사용한다.
+
+        Returns:
+            (base_date "YYYYMMDD", base_time "HH00")
+        """
+        current_minutes = _date.hour * 60 + _date.minute
+
+        # 각 base_time의 API 제공 시각(분): 02:10=130, 05:10=310, ...
+        available_minutes = [int(bt[:2]) * 60 + 10 for bt in KmaShortForecastAPI._BASE_TIMES]
+
+        selected_index = -1
+        for i, avail in enumerate(available_minutes):
+            if current_minutes >= avail:
+                selected_index = i
+
+        if selected_index == -1:
+            # 00:00 ~ 02:10 -> 전일 2300
+            base_time = "2300"
+            _date = _date - timedelta(days=1)
+        else:
+            base_time = KmaShortForecastAPI._BASE_TIMES[selected_index]
+
+        return _date.strftime("%Y%m%d"), base_time

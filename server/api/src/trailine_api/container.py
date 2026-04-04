@@ -12,7 +12,8 @@ from trailine_api.repositories.course_repositories import (
 )
 from trailine_api.repositories.place_repositories import IPlaceRepository, PlaceRepository
 from trailine_api.repositories.weather_repositories import IWeatherRepository, WeatherRepository
-from trailine_api.externals.datago import IKmaMidLandForecastAPI, KmaMidLandForecastAPI, IKmaMidLandTemperatureAPI, KmaMidLandTemperatureAPI
+from trailine_api.externals.datago import IKmaMidLandForecastAPI, KmaMidLandForecastAPI, IKmaMidLandTemperatureAPI, \
+    KmaMidLandTemperatureAPI, IKmaShortForecastAPI, KmaShortForecastAPI
 from trailine_api.services.course_services import ICourseService, CourseService
 from trailine_api.services.weather_services import IWeatherService, WeatherService
 
@@ -31,6 +32,10 @@ class Container(containers.DeclarativeContainer):
     )
     kma_mid_temperature_api: Factory[IKmaMidLandTemperatureAPI] = Singleton(
         KmaMidLandTemperatureAPI,
+        service_key=Config.DATAGO_SERVICE_KEY
+    )
+    kma_short_forecast_api: Factory[IKmaShortForecastAPI] = Singleton(
+        KmaShortForecastAPI,
         service_key=Config.DATAGO_SERVICE_KEY
     )
 
@@ -55,4 +60,5 @@ class Container(containers.DeclarativeContainer):
         course_repository=course_repository,
         kma_mid_forecast_api=kma_mid_forecast_api,
         kma_mid_temperature_api=kma_mid_temperature_api,
+        kma_short_forecast_api=kma_short_forecast_api,
     )
