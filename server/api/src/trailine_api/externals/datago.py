@@ -28,10 +28,12 @@ class DatagoAPI:
         self.url = f"{self.base_url}{uri}"
 
     @staticmethod
-    def _parse_response(response: httpx.Response) -> Dict:
+    def _parse_response(response: httpx.Response) -> Dict | None:
         data = response.json()
         result_code = data["response"]["header"]["resultCode"]
-        if result_code != "00":
+        if result_code == "03": # 데이터 없음
+            return None
+        elif result_code != "00":
             result_msg = data["response"]["header"]["resultMsg"]
             raise ValueError(f"Datago API error: [{result_code}] {result_msg}")
         return data["response"]["body"]["items"]
@@ -54,7 +56,13 @@ class KmaMidForecastBase(DatagoAPI):
             "tmFc": forecast_time,
         })
         response.raise_for_status()
-        return self._parse_response(response)["item"][0]
+
+        res_items = self._parse_response(response)
+
+        if not res_items:
+            return {}
+
+        return res_items["item"][0]
 
     @staticmethod
     def _convert_time_to_forecast_time(_date: datetime) -> str:
@@ -181,9 +189,20 @@ class KmaShortForecastAPI(DatagoAPI, IKmaShortForecastAPI):
             # While문 탈출 여부
             if (
                     prev_base_date is not None
-                    and prev_base_date >= end_date
+                    and prev_base_date > end_date
             ):
                 break
+
+            print({
+                "serviceKey": self.service_key,
+                "dataType": "JSON",
+                "numOfRows": 500,
+                "pageNo": page,
+                "base_date": base_date,
+                "base_time": base_time,
+                "nx": nx,
+                "ny": ny,
+            })
 
             # API 호출
             response = httpx.get(self.url, params={
@@ -199,10 +218,11 @@ class KmaShortForecastAPI(DatagoAPI, IKmaShortForecastAPI):
             response.raise_for_status()
 
             # 데이터 수집
-            items = self._parse_response(response)["item"]
-
-            if len(items) == 0:
+            res_items: Dict | None = self._parse_response(response)
+            if not res_items:
                 break
+
+            items = res_items["item"]
 
             for item in items:
                 forecast_date, forecast_time = item["fcstDate"], item["fcstTime"]
@@ -210,7 +230,7 @@ class KmaShortForecastAPI(DatagoAPI, IKmaShortForecastAPI):
 
                 category, value = item["category"], item["fcstValue"]
                 prev_base_date = forecast_date_key.date()
-                if prev_base_date >= end_date:
+                if prev_base_date > end_date:
                     break
 
                 raw_items[forecast_date_key]["forecast_date"] = forecast_date_key
