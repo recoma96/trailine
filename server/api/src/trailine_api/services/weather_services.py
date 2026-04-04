@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException
 from starlette import status
 
+from trailine_api.common.cache import RedisCache
 from trailine_api.common.db import session_scope
 from trailine_api.common.types import CourseLocationType, DatagoShortForecastRainCondition, SkyCondition
 from trailine_api.common.utils import latlon_to_grid
@@ -16,10 +17,12 @@ from trailine_api.schemas.weather import ShortForecastItem, WeatherForecastItemS
 
 
 MID_FORECAST_MIN_DAY = 5  # 기상청 중기예보 시작일 (5일 후부터)
+CACHE_TTL_SECONDS = 3600  # 1시간
 DATE_FORMAT = "%Y-%m-%d"
 
 
 class IWeatherService(metaclass=ABCMeta):
+    _cache: RedisCache
     _course_repository: ICourseRepository
     _weather_repository: IWeatherRepository
     _kma_mid_forecast_api: IKmaMidLandForecastAPI
@@ -28,12 +31,14 @@ class IWeatherService(metaclass=ABCMeta):
 
     def __init__(
             self,
+            cache: RedisCache,
             course_repository: ICourseRepository,
             weather_repository: IWeatherRepository,
             kma_mid_forecast_api: IKmaMidLandForecastAPI,
             kma_mid_temperature_api: IKmaMidLandTemperatureAPI,
             kma_short_forecast_api: IKmaShortForecastAPI
     ):
+        self._cache = cache
         self._course_repository = course_repository
         self._weather_repository = weather_repository
         self._kma_mid_forecast_api = kma_mid_forecast_api
@@ -41,7 +46,7 @@ class IWeatherService(metaclass=ABCMeta):
         self._kma_short_forecast_api = kma_short_forecast_api
 
     @abstractmethod
-    def get_forecasts(self, course_id: int, days: int) -> List[WeatherForecastItemSchema]:
+    async def get_forecasts(self, course_id: int, days: int) -> List[WeatherForecastItemSchema]:
         """
         특정 위치/주소애 대한 장기 일기예보 정보를 가져오는 함수
         """
@@ -49,7 +54,14 @@ class IWeatherService(metaclass=ABCMeta):
 
 
 class WeatherService(IWeatherService):
-    def get_forecasts(self, course_id: int, days: int) -> List[WeatherForecastItemSchema]:
+    async def get_forecasts(self, course_id: int, days: int) -> List[WeatherForecastItemSchema]:
+        # 캐싱된 데이터 가져오기
+        cache_key = f"weather:course:{course_id}:{days}"
+        cached = await self._cache.get_json(cache_key)
+        if cached is not None:
+            return [WeatherForecastItemSchema(**item) for item in cached]
+
+        # 캐싱된 데이터 없으면 직접 조회
         status_code, temp_code, nx, ny = self._get_course_weather_info(course_id)
 
         results: List[WeatherForecastItemSchema] = []
@@ -60,6 +72,13 @@ class WeatherService(IWeatherService):
         # days >= 5: 중기예보 활용
         if days >= MID_FORECAST_MIN_DAY:
             results.extend(self._build_mid_forecasts(status_code, temp_code, days))
+
+        # 캐시에 데이터 올리기
+        await self._cache.set_json(
+            cache_key,
+            [item.model_dump(by_alias=True) for item in results],
+            ttl_seconds=CACHE_TTL_SECONDS,
+        )
 
         return results
 

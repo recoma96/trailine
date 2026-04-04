@@ -145,7 +145,7 @@ async def get_course_weather_forecast(
     course_id: int = Path(..., description="코스 고유 아이디"),
     days: int = Query(3, ge=1, le=10, description="조회할 일기예보 일수 (최대 10일)"),
 ):
-    forecasts = weather_service.get_forecasts(course_id, days)
+    forecasts = await weather_service.get_forecasts(course_id, days)
 
     return WeatherForecastResponseSchema(
         courseId=course_id,

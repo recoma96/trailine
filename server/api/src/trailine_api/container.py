@@ -1,6 +1,7 @@
 from dependency_injector import containers
 from dependency_injector.providers import Factory, Singleton, Resource
 
+from trailine_api.common.cache import cache
 from trailine_api.config import Config
 from trailine_api.repositories.course_repositories import (
     CourseRepository,
@@ -56,6 +57,7 @@ class Container(containers.DeclarativeContainer):
     )
     weather_service: Factory[IWeatherService] = Factory(
         WeatherService,
+        cache=cache,
         weather_repository=weather_repository,
         course_repository=course_repository,
         kma_mid_forecast_api=kma_mid_forecast_api,
