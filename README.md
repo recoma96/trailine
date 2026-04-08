@@ -5,9 +5,9 @@
 
 ## Demo Screenshots
 
-![](docs/imgs/readme-1.png)
-![](docs/imgs/readme-2.png)
-![](docs/imgs/readme-3.png)
+![](docs/imgs/screenshots/0.3.0/1.png)
+![](docs/imgs/screenshots/0.3.0/2.png)
+![](docs/imgs/screenshots/0.3.0/3.png)
 
 
 * * *
