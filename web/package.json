@@ -11,7 +11,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@astrojs/node": "^10.0.0",
+    "@astrojs/node": "^9.5.1",
     "@astrojs/react": "^4.4.2",
     "@tailwindcss/vite": "^4.1.17",
     "@types/navermaps": "^3.9.1",
