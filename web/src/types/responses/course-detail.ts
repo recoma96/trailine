@@ -24,7 +24,7 @@ export interface CourseDetailSchemaResponse {
     loadAddresses: string[];
     roadAddresses: string[];
     difficulty: Difficulty;
-    styles: Style;
+    courseStyle: Style;
     images: Image[];
     length: number;
     duration: number;

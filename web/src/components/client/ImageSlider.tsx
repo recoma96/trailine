@@ -19,11 +19,10 @@ type Image = {
 interface ImageSliderProps {
     images: Image[];
     className?: string;
-    height: number;
+    heightClassName?: string;
 }
 
-const ImageSlider: React.FC<ImageSliderProps> = ({ images, className, height }) => {
-    if (className === undefined) className = "";
+const ImageSlider: React.FC<ImageSliderProps> = ({ images, className = "", heightClassName = "h-[250px] lg:h-[700px]" }) => {
     return (
         <div className={`${className} bg-black`}>
             <Swiper
@@ -42,11 +41,10 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ images, className, height }) 
                             <div className="absolute left-0 top-0 z-10 bg-black bg-opacity-50 p-2 text-sm text-white">
                                 {image.title}
                             </div>
-                            <img 
-                                src={image.url} 
-                                alt={image.title} 
-                                className="block w-full object-contain"
-                                style={{height: `${height}px`}}
+                            <img
+                                src={image.url}
+                                alt={image.title}
+                                className={`block w-full object-contain ${heightClassName}`}
                             />
                         </div>
                     </SwiperSlide>
