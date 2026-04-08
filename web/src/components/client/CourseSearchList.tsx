@@ -57,44 +57,42 @@ const CourseSearchList: React.FC = () => {
     const paginationItems = getPaginationItems(currentPage, totalPages);
 
     return (
-        <div className="mt-5 overflow-xauto rounded-box bg-base-100 w-full lg:w-[700px]">
-            <table className="table border border-base-content/5">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>코스명</th>
-                        <th>주소</th>
-                        <th>코스 스타일</th>
-                        <th>난이도</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {courses.map((course, index) => (
-                        <tr key={course.id}>
-                            <th>{((currentPage - 1) * (searchResult?.pageSize || 10)) + index + 1}</th>
-                            <td><a href={`/courses/${course.id}`} className="hover:underline">{course.name}</a></td>
-                            <td>
-                                {course.roadAddresses.length > 0 ? (
-                                    course.roadAddresses[0]
-                                ) : (
-                                    course.loadAddresses[0]
-                                )}
-                            </td>
-                            <td>{course.courseStyle.name}</td>
-                            <td><div
-                                className="text-white px-2 py-1.5 rounded-md text-center w-15 text-base"
-                                style={{ backgroundColor: COURSE_DIFFICULTY_COLORS[course.difficulty.level] }}
-                            >Lv.{course.difficulty.level}</div></td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-            
+        <div className="mt-5 w-full lg:w-[700px]">
+            {/* Course Card List */}
+            <div className="flex flex-col gap-3">
+                {courses.map((course) => (
+                    <a
+                        key={course.id}
+                        href={`/courses/${course.id}`}
+                        className="flex items-center gap-4 p-4 rounded-box border border-base-content/10 bg-base-100 hover:shadow-md transition-shadow"
+                    >
+                        {/* Difficulty Badge */}
+                        <div
+                            className="text-white px-2 py-1.5 rounded-md text-center min-w-12 text-sm font-bold shrink-0"
+                            style={{ backgroundColor: COURSE_DIFFICULTY_COLORS[course.difficulty.level] }}
+                        >
+                            Lv.{course.difficulty.level}
+                        </div>
+
+                        {/* Course Info */}
+                        <div className="flex-1 min-w-0">
+                            <div className="font-bold text-base truncate">{course.name}</div>
+                            <div className="text-sm text-base-content/60 truncate">
+                                {course.roadAddresses.length > 0 ? course.roadAddresses[0] : course.loadAddresses[0]}
+                            </div>
+                        </div>
+
+                        {/* Course Style Tag */}
+                        <div className="badge badge-outline shrink-0">{course.courseStyle.name}</div>
+                    </a>
+                ))}
+            </div>
+
             {/* Pagination */}
             <div className="text-center mt-10">
                 <div className="join">
                     {paginationItems.map((page, index) => (
-                        <button 
+                        <button
                             key={index}
                             className={`join-item btn ${page === '...' ? 'btn-disabled' : ''} ${page === currentPage.toString() ? 'btn-active' : ''}`}
                             onClick={() => handlePageChange(page)}
