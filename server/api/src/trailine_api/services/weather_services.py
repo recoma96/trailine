@@ -13,7 +13,7 @@ from trailine_api.common.utils import latlon_to_grid
 from trailine_api.externals.datago import IKmaMidLandForecastAPI, IKmaMidLandTemperatureAPI, IKmaShortForecastAPI
 from trailine_api.repositories.course_repositories import ICourseRepository
 from trailine_api.repositories.weather_repositories import IWeatherRepository
-from trailine_api.schemas.weather import ShortForecastItem, WeatherForecastItemSchema
+from trailine_api.schemas.weather import DAY_OF_WEEK_KO_LIST, DAY_OF_WEEK_LIST, ShortForecastItem, WeatherForecastItemSchema
 
 
 MID_FORECAST_MIN_DAY = 5  # 기상청 중기예보 시작일 (5일 후부터)
@@ -132,10 +132,13 @@ class WeatherService(IWeatherService):
         results: List[WeatherForecastItemSchema] = []
         for date_key in sorted(daily):
             items = daily[date_key]
+            weekday = datetime.strptime(date_key, DATE_FORMAT).weekday()
 
             results.append(
                 WeatherForecastItemSchema(
                     date=date_key,
+                    dayOfWeek=DAY_OF_WEEK_LIST[weekday],
+                    dayOfWeekKo=DAY_OF_WEEK_KO_LIST[weekday],
                     minTemperature=min(item.temperature for item in items),
                     maxTemperature=max(item.temperature for item in items),
                     precipitationProbability=max(item.rain_probability for item in items),
@@ -173,9 +176,12 @@ class WeatherService(IWeatherService):
             raw_i = i - MID_FORECAST_MIN_DAY
             forecast_date = today + timedelta(days=i)
 
+            weekday = forecast_date.weekday()
             results.append(
                 WeatherForecastItemSchema(
                     date=forecast_date.strftime(DATE_FORMAT),
+                    dayOfWeek=DAY_OF_WEEK_LIST[weekday],
+                    dayOfWeekKo=DAY_OF_WEEK_KO_LIST[weekday],
                     minTemperature=mid_temperatures[raw_i].min_temperature,
                     maxTemperature=mid_temperatures[raw_i].max_temperature,
                     precipitationProbability=max(
