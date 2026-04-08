@@ -49,25 +49,32 @@ const CourseIntervalDetail: React.FC<Props> = ({courseId} : Props) => {
     return (
         <div className="lg:flex lg:gap-10 w-full">
             <CourseMap intervalCount={intervalCount} intervals={intervals} className="w-full h-[600px] lg:w-full lg:flex-1 lg:min-w-0" />
-            <ul className="mt-10 lg:flex-1 lg:min-w-0 flex flex-col gap-y-3">
+            <ul className="mt-10 lg:mt-0 lg:flex-1 lg:min-w-0 flex flex-col gap-y-4">
                 {intervals.map((interval, idx) => (
                     <li>
                         <div className="collapse bg-base-100 border-base-300 border">
                             <input type="checkbox" />
-                            <div
-                                className="collapse-title font-semibold text-white lg:w-auto w-full"
-                                style={{background: INTERVAL_DIFFICULTY_COLORS[interval.difficulty.level]}}>{
-                                    idx + 1}. {interval.name} [{interval.difficulty.name}] ({interval.length} km, {minutesToKoreanDuration(interval.duration)})
+                            <div className="collapse-title flex items-center gap-3 lg:w-auto w-full">
+                                <div
+                                    className="text-white text-xs font-bold px-2 py-1 rounded-md shrink-0"
+                                    style={{backgroundColor: INTERVAL_DIFFICULTY_COLORS[interval.difficulty.level]}}
+                                >
+                                    {interval.difficulty.name}
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="font-semibold truncate">{idx + 1}. {interval.name}</p>
+                                    <p className="text-xs text-base-content/60">{interval.length} km · {minutesToKoreanDuration(interval.duration)}</p>
+                                </div>
                             </div>
-                            <div className="collapse-content text-sm pt-5">
+                            <div className="collapse-content text-sm">
+                                <p className="mb-4">{interval.description}</p>
                                 {interval.images && interval.images.length > 0 && (
                                     <ImageSlider images={interval.images.map((image) => ({
                                         url: image.url,
                                         title: image.title ?? "",
                                         description: image.description,
-                                    }))} className="max-w-full mx-auto mb-4" height={400} />
+                                    }))} className="max-w-full mx-auto" heightClassName="h-[200px] lg:h-[400px]" />
                                 )}
-                                <p>{interval.description}</p>
                             </div>
                         </div>
                     </li>

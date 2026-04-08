@@ -53,35 +53,59 @@ const difficultyBackgroundColor = course ? COURSE_DIFFICULTY_COLORS[course.diffi
     <script type="text/javascript" src=`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NaverMapsAPIClient}`></script>
 
 
+    <!-- 목록으로 돌아가기 -->
+    <a href="/courses" class="inline-flex items-center gap-1 text-sm text-base-content/60 hover:text-base-content mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        코스 목록으로 돌아가기
+    </a>
+
     <!-- 상단 소개 부분 -->
     <div class="text-center mb-6">
-        <h2>{course?.name}</h2>
-        <p>{mainAddress}</p>
+        <h2 class="text-2xl font-bold">{course?.name}</h2>
+        <div class="mt-1"><span class="badge badge-outline">{course?.courseStyle?.name}</span></div>
+        <p class="text-base-content/60 mt-1 inline-flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {mainAddress}
+        </p>
     </div>
 
-    <!-- 난이도 / 코스 길이 / 쇼요시간 -->
-    <div class="flex justify-center gap-4 mb-6">
-        <div class="px-4 py-2 rounded-lg" style={`background-color: ${difficultyBackgroundColor}; color: white;`}>
-            <p class="font-bold">Lv. {course?.difficulty?.level} | {course?.difficulty?.code}</p>
-            <p class="text-sm">{course?.difficulty?.name}</p>
-        </div>
-        <div class="bg-gray-100 px-4 py-2 rounded-lg">
-            <p class="text-sm">총 길이</p>
-            <p class="font-bold">{course?.length} km</p>
-        </div>
-        <div class="bg-gray-100 px-4 py-2 rounded-lg">
-            <p class="text-sm">소요 시간</p>
-            <p class="font-bold">{minutesToKoreanDuration(course?.duration || 0)}</p>
+    <!-- 난이도 / 코스 길이 / 소요시간 -->
+    <div class="card border border-base-content/10 bg-base-100 p-5 mb-6 w-full">
+        <div class="flex flex-col items-center gap-3 lg:flex-row lg:justify-center lg:gap-4">
+            <!-- 총 길이 / 소요 시간 (모바일: 위, 데스크톱: 난이도 뒤) -->
+            <div class="flex gap-4 w-full lg:w-auto lg:order-2">
+                <div class="bg-base-200 px-4 py-2 rounded-lg flex-1 lg:flex-none">
+                    <p class="text-sm">총 길이</p>
+                    <p class="font-bold">{course?.length} km</p>
+                </div>
+                <div class="bg-base-200 px-4 py-2 rounded-lg flex-1 lg:flex-none">
+                    <p class="text-sm">소요 시간</p>
+                    <p class="font-bold">{minutesToKoreanDuration(course?.duration || 0)}</p>
+                </div>
+            </div>
+            <!-- 난이도 (모바일: 아래, 데스크톱: 앞) -->
+            <div class="w-full lg:w-auto lg:order-1 px-4 py-2 rounded-lg text-white" style={`background-color: ${difficultyBackgroundColor};`}>
+                <p class="font-bold">Lv. {course?.difficulty?.level} | {course?.difficulty?.code}</p>
+                <p class="text-sm">{course?.difficulty?.name}</p>
+            </div>
         </div>
     </div>
 
     <!-- 코스 이미지 슬라이더 -->
     {course?.images && course.images.length > 0 && (
-        <ImageSlider client:load images={course.images} className="w-full mx-auto" height={700} />
+        <ImageSlider client:load images={course.images} className="w-full mx-auto" />
     )}
 
     <!-- 코스 설명 글상자 -->
-    <div class="my-10 p-5 border text-left prose" set:html={htmlDescription} />
+    <div class="my-10 bg-base-200 rounded-lg p-5">
+        <p class="text-sm font-bold text-base-content/60 mb-3">코스 소개</p>
+        <div class="text-left prose" set:html={htmlDescription} />
+    </div>
     
     <!-- 코스 구간 세부정보  -->
     <CourseIntervalDetail courseId={course?.id} client:load />

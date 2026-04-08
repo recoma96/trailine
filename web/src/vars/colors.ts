@@ -1,10 +1,10 @@
 export const INTERVAL_DIFFICULTY_COLORS = [ // index = difficulty level
     '#777777',  // unknown
     '#58b947',  // easy
-    '#3c86c6',  // normal
-    '#f68820',  // advanced
+    '#f68820',  // normal
     '#bf2327',  // hard
-    '#010101',  // expert
+    '#57187D',  // very hard
+    '#010101',  // exporting
 ];
 
 export const COURSE_DIFFICULTY_COLORS = [
