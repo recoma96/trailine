@@ -14,6 +14,9 @@ DB_PORT=5432
 DB_USER=<아이디>
 DB_PSWD=<패스워드>
 DB_SCHEMA=<스키마이름>
+DATAGO_SERVICE_KEY=<공공데이터포털 서비스키>
+REDIS_URL=
+REDIS_HEALTH_CHECK_INTERVAL=<초단위>
 ```
 
 ```shell
