@@ -193,17 +193,6 @@ class KmaShortForecastAPI(DatagoAPI, IKmaShortForecastAPI):
             ):
                 break
 
-            print({
-                "serviceKey": self.service_key,
-                "dataType": "JSON",
-                "numOfRows": 500,
-                "pageNo": page,
-                "base_date": base_date,
-                "base_time": base_time,
-                "nx": nx,
-                "ny": ny,
-            })
-
             # API 호출
             response = httpx.get(self.url, params={
                 "serviceKey": self.service_key,

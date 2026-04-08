@@ -11,8 +11,14 @@ from trailine_api.common.types import (
 )
 
 
+DAY_OF_WEEK_LIST = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+DAY_OF_WEEK_KO_LIST = ["월", "화", "수", "목", "금", "토", "일"]
+
+
 class WeatherForecastItemSchema(BaseModel):
     date: str = Field(..., description="예보 날짜 (YYYY-MM-DD)")
+    day_of_week: str = Field(..., alias="dayOfWeek", description="요일 (영문)")
+    day_of_week_ko: str = Field(..., alias="dayOfWeekKo", description="요일 (한국어)")
     min_temperature: float = Field(..., alias="minTemperature", description="최저 기온 (°C)")
     max_temperature: float = Field(..., alias="maxTemperature", description="최고 기온 (°C)")
     precipitation_probability: int = Field(..., alias="precipitationProbability", description="강수 확률 (%)")

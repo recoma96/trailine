@@ -5,9 +5,9 @@
 
 ## Demo Screenshots
 
-![](docs/imgs/readme-1.png)
-![](docs/imgs/readme-2.png)
-![](docs/imgs/readme-3.png)
+![](docs/imgs/screenshots/0.3.0/1.png)
+![](docs/imgs/screenshots/0.3.0/2.png)
+![](docs/imgs/screenshots/0.3.0/3.png)
 
 
 * * *
@@ -52,6 +52,10 @@ DB_PORT=
 DB_USER=
 DB_PSWD=
 DB_SCHEMA=
+DATAGO_SERVICE_KEY=<공공데이터포털 서비스키>
+REDIS_URL=
+REDIS_HEALTH_CHECK_INTERVAL=<초단위>
+
 ```
 
 2. web 디렉토리에 들어가서 `.local.env`라는 환경변수 파일에 클라이언트 빌드에 필요한 환경변수를 입력합니다.

@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from trailine_model.base import SessionLocal, DATABASE_URL
+from trailine_model.base import SessionLocal
 
 @contextmanager
 def get_db():
@@ -12,6 +12,3 @@ def get_db():
         raise
     finally:
         db.close()
-
-
-print(DATABASE_URL)

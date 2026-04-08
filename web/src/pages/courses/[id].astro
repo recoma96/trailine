@@ -8,6 +8,7 @@ import type { CourseDetailSchemaResponse } from "@/types/responses/course-detail
 import CourseIntervalDetail from "@/components/client/CourseIntervalDetail";
 import { COURSE_DIFFICULTY_COLORS } from "@/vars/colors";
 import { minutesToKoreanDuration } from "@/lib/string-mapper";
+import WeatherForecast from "@/components/client/WeatherForecast";
 
 
 const { id } = Astro.params;
@@ -95,6 +96,9 @@ const difficultyBackgroundColor = course ? COURSE_DIFFICULTY_COLORS[course.diffi
             </div>
         </div>
     </div>
+
+    <!-- 주간 날씨 예보 -->
+    <WeatherForecast client:load courseId={course?.id} />
 
     <!-- 코스 이미지 슬라이더 -->
     {course?.images && course.images.length > 0 && (
