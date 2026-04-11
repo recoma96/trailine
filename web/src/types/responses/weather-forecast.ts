@@ -11,6 +11,9 @@ export interface Forecast {
 }
 
 export interface WeatherForecastResponse {
+    source: string;
+    provider: string;
+    publishedAt: string;
     courseId: number;
     forecasts: Forecast[];
 }

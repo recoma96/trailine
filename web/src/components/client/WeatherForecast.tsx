@@ -54,8 +54,18 @@ const formatDate = (dateStr: string): string => {
     return `${parseInt(month)}/${parseInt(day)}`;
 };
 
+const formatPublishedAt = (isoString: string): string => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}.${month}.${day} ${hours}:${minutes}`;
+};
+
 const WeatherForecast: React.FC<Props> = ({ courseId }: Props) => {
-    const [forecasts, setForecasts] = useState<Forecast[]>([]);
+    const [forecastData, setForecastData] = useState<WeatherForecastResponse | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<boolean>(false);
 
@@ -69,7 +79,7 @@ const WeatherForecast: React.FC<Props> = ({ courseId }: Props) => {
                 return res.json();
             })
             .then((data: WeatherForecastResponse) => {
-                setForecasts(data.forecasts);
+                setForecastData(data);
             })
             .catch(() => {
                 setError(true);
@@ -90,7 +100,9 @@ const WeatherForecast: React.FC<Props> = ({ courseId }: Props) => {
         );
     }
 
-    if (error || forecasts.length === 0) return null;
+    if (error || forecastData === null || forecastData.forecasts.length === 0) return null;
+
+    const { forecasts, source, provider, publishedAt } = forecastData;
 
     return (
         <div className="my-6">
@@ -145,6 +157,11 @@ const WeatherForecast: React.FC<Props> = ({ courseId }: Props) => {
                     );
                 })}
             </div>
+
+            {/* 출처 / 제공자 / 발표시각 */}
+            <p className="text-xs text-base-content/40 mt-2 text-right">
+                출처: {source} · 제공: {provider} · 발표: {formatPublishedAt(publishedAt)}
+            </p>
         </div>
     );
 };

@@ -17,7 +17,7 @@ from trailine_api.schemas.weather import DAY_OF_WEEK_KO_LIST, DAY_OF_WEEK_LIST, 
 
 
 MID_FORECAST_MIN_DAY = 5  # 기상청 중기예보 시작일 (5일 후부터)
-CACHE_TTL_SECONDS = 3600  # 1시간
+CACHE_TTL_SECONDS = 3600 * 3  # 1시간 + 3시간
 DATE_FORMAT = "%Y-%m-%d"
 
 
@@ -46,7 +46,9 @@ class IWeatherService(metaclass=ABCMeta):
         self._kma_short_forecast_api = kma_short_forecast_api
 
     @abstractmethod
-    async def get_forecasts(self, course_id: int, days: int) -> List[WeatherForecastItemSchema]:
+    async def get_forecasts(
+        self, course_id: int, days: int
+    ) -> Tuple[datetime, List[WeatherForecastItemSchema]]:
         """
         특정 위치/주소애 대한 장기 일기예보 정보를 가져오는 함수
         """
@@ -54,12 +56,17 @@ class IWeatherService(metaclass=ABCMeta):
 
 
 class WeatherService(IWeatherService):
-    async def get_forecasts(self, course_id: int, days: int) -> List[WeatherForecastItemSchema]:
-        # 캐싱된 데이터 가져오기
-        cache_key = f"weather:course:{course_id}:{days}"
+    async def get_forecasts(
+        self, course_id: int, days: int
+    ) -> Tuple[datetime, List[WeatherForecastItemSchema]]:
+        # 발표 시각 계산 (네트워크 호출 없이 시간 계산만 수행)
+        published_at = self._resolve_published_at(days)
+
+        # 캐싱된 데이터 가져오기 (발표 시각이 바뀌면 키도 자연스럽게 무효화)
+        cache_key = f"weather:course:{course_id}:{days}:{published_at.strftime('%Y%m%d%H%M')}"
         cached = await self._cache.get_json(cache_key)
         if isinstance(cached, list):
-            return [WeatherForecastItemSchema(**item) for item in cached]
+            return published_at, [WeatherForecastItemSchema(**item) for item in cached]
 
         # 캐싱된 데이터 없으면 직접 조회
         status_code, temp_code, nx, ny = self._get_course_weather_info(course_id)
@@ -80,7 +87,20 @@ class WeatherService(IWeatherService):
             ttl_seconds=CACHE_TTL_SECONDS,
         )
 
-        return results
+        return published_at, results
+
+    def _resolve_published_at(self, days: int) -> datetime:
+        """요청 days에 따라 사용된 예보 API의 발표 시각을 결정한다.
+
+        days < 5인 경우는 단기예보만 사용하므로 단기예보 발표 시각을 그대로 사용하고,
+        days >= 5인 경우 단기/중기 발표 시각 중 가장 최근 시각을 사용한다.
+        """
+        short_published_at = self._kma_short_forecast_api.get_published_at()
+        if days < MID_FORECAST_MIN_DAY:
+            return short_published_at
+
+        mid_published_at = self._kma_mid_forecast_api.get_published_at()
+        return max(short_published_at, mid_published_at)
 
     def _get_course_weather_info(self, course_id: int) -> Tuple[str, str, int, int]:
         """DB에서 기상청 코드와 좌표를 조회한다."""
