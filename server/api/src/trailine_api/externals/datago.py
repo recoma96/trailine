@@ -45,6 +45,11 @@ class KmaMidForecastBase(DatagoAPI):
     하위 클래스에서 call()과 _parse_items()를 구현하여 사용한다.
     """
 
+    def get_published_at(self) -> datetime:
+        """현재 시각 기준 중기예보의 발표 시각을 datetime으로 반환한다."""
+        forecast_time_str = self._convert_time_to_forecast_time(datetime.now())
+        return datetime.strptime(forecast_time_str, "%Y%m%d%H%M")
+
     def _fetch_first_item(self, regional_code: str) -> Dict[str, Any]:
         """정상 응답 시, 실제 데이터 추출
         """
@@ -97,6 +102,10 @@ class IKmaMidLandForecastAPI(metaclass=ABCMeta):
     def call(self, regional_code: str) -> List[MidLandForecastItem]:
         pass
 
+    @abstractmethod
+    def get_published_at(self) -> datetime:
+        pass
+
 
 class IKmaMidLandTemperatureAPI(metaclass=ABCMeta):
     """중기 날씨 기온 예보
@@ -105,12 +114,20 @@ class IKmaMidLandTemperatureAPI(metaclass=ABCMeta):
     def call(self, regional_code: str) -> List[MidLandTemperatureItem]:
         pass
 
+    @abstractmethod
+    def get_published_at(self) -> datetime:
+        pass
+
 
 class IKmaShortForecastAPI(metaclass=ABCMeta):
     """단기 날씨 예보
     """
     @abstractmethod
     def call(self, nx: int, ny: int, days: int) -> List[ShortForecastItem]:
+        pass
+
+    @abstractmethod
+    def get_published_at(self) -> datetime:
         pass
 
 # ──────────────────────────────────────────
@@ -172,6 +189,11 @@ class KmaShortForecastAPI(DatagoAPI, IKmaShortForecastAPI):
 
     def __init__(self, service_key: str):
         super().__init__(service_key, "/1360000/VilageFcstInfoService_2.0/getVilageFcst")
+
+    def get_published_at(self) -> datetime:
+        """현재 시각 기준 단기예보의 발표 시각을 datetime으로 반환한다."""
+        base_date, base_time = self._convert_time_to_forecast_time(datetime.now())
+        return datetime.strptime(f"{base_date}{base_time}", "%Y%m%d%H%M")
 
     def call(self, nx: int, ny: int, days: int) -> List[ShortForecastItem]:
         if days > 4:

@@ -26,6 +26,9 @@ class WeatherForecastItemSchema(BaseModel):
 
 
 class WeatherForecastResponseSchema(BaseModel):
+    source: str = Field(..., description="출처")
+    provider: str = Field(..., description="API 제공자")
+    published_at: datetime = Field(..., alias="publishedAt", description="발표 시각")
     course_id: int = Field(..., alias="courseId", description="코스 식별자")
     forecasts: List[WeatherForecastItemSchema] = Field(..., description="일기예보 리스트")
 
