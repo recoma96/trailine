@@ -79,9 +79,7 @@ class CourseInterval(Base, TimeStampModel):
     images: Mapped[List["CourseIntervalImage"]] = relationship("CourseIntervalImage", back_populates="course_interval")
 
     def __str__(self) -> str:
-        # Admin에서의 Place Lazy Loading 이슈로 인해 이란 Name대신 고유 ID로 임시방편
-        # TODO 추후 해당 관련 이슈 해결 필요
-        return f"Place A to B: {self.place_a_id} - {self.place_b_id}"
+        return f"{self.name} ({round(self.length_m / 1000, 1)} km)"
 
 
 class CourseStyle(Base, TimeStampModel):

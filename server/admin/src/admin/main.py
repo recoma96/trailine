@@ -89,20 +89,34 @@ class PlaceAdmin(ModelView, model=Place):
         form.geo = StringField(DEFAULT_GEO_COLUMN_NAME)
         return form
 
+    # 수정 페이지 진입 시 현재 위경도를 'geo' 가상 필드에 주입합니다.
+    async def get_object_for_edit(self, request: Request) -> Any:
+        obj = await super().get_object_for_edit(request)
+        if obj is not None and getattr(obj, "geom", None) is not None:
+            point = to_shape(obj.geom)
+            obj.geo = f"{point.y}, {point.x}"
+        return obj
+
     # 모델 저장 직전에 데이터를 변환합니다.
     async def on_model_change(
         self, data: dict, model: Any, is_created: bool, request: Request
     ) -> None:
-        geo_string = data.get("geo")
+        # 가상 필드 'geo'는 실제 컬럼이 아니므로, sqladmin의 setattr 루프에
+        # 도달하기 전에 반드시 data에서 제거해야 합니다.
+        geo_string = data.pop("geo", None)
+
         if not geo_string:
+            # 값이 없으면 기존 위경도 데이터를 그대로 유지합니다.
+            if is_created:
+                raise HTTPException(
+                    status_code=HTTP_400_BAD_REQUEST,
+                    detail="위경도 데이터가 필요합니다."
+                )
             return
 
         lat, lon = parse_string_to_lat_lng(geo_string) # 실패 시 ValueError 발생
         point_element = parse_location_to_wkt(lat, lon)
         model.geog = model.geom = point_element
-
-        # 가상 필드인 'geo'는 모델에 저장하지 않으므로 data 딕셔너리에서 제거
-        data.pop("geo", None)
 
 
 class PlaceImageAdmin(ModelView, model=PlaceImage):
@@ -382,20 +396,34 @@ class KmaMountainForecastAreaAdmin(ModelView, model=KmaMountainForecastArea):
         form.geo = StringField(DEFAULT_GEO_COLUMN_NAME)
         return form
 
+    # 수정 페이지 진입 시 현재 위경도를 'geo' 가상 필드에 주입합니다.
+    async def get_object_for_edit(self, request: Request) -> Any:
+        obj = await super().get_object_for_edit(request)
+        if obj is not None and getattr(obj, "geom", None) is not None:
+            point = to_shape(obj.geom)
+            obj.geo = f"{point.y}, {point.x}"
+        return obj
+
     # 모델 저장 직전에 데이터를 변환합니다.
     async def on_model_change(
         self, data: dict, model: Any, is_created: bool, request: Request
     ) -> None:
-        geo_string = data.get("geo")
+        # 가상 필드 'geo'는 실제 컬럼이 아니므로, sqladmin의 setattr 루프에
+        # 도달하기 전에 반드시 data에서 제거해야 합니다.
+        geo_string = data.pop("geo", None)
+
         if not geo_string:
+            # 값이 없으면 기존 위경도 데이터를 그대로 유지합니다.
+            if is_created:
+                raise HTTPException(
+                    status_code=HTTP_400_BAD_REQUEST,
+                    detail="위경도 데이터가 필요합니다."
+                )
             return
 
         lat, lon = parse_string_to_lat_lng(geo_string) # 실패 시 ValueError 발생
         point_element = parse_location_to_wkt(lat, lon)
         model.geog = model.geom = point_element
-
-        # 가상 필드인 'geo'는 모델에 저장하지 않으므로 data 딕셔너리에서 제거
-        data.pop("geo", None)
 
 
 admin.add_view(UserAdmin)
