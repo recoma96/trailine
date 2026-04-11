@@ -20,3 +20,4 @@ trailine-model = { workspace = true }
 
 [project.scripts]
 add-kma-mountain-areas = "trailine_scripts.add_kma_mountain_areas:main"
+upload-course-intervals = "trailine_scripts.upload_course_intervals:main"
